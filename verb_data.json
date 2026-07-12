@@ -1,0 +1,722 @@
+[
+  {
+    "num": 1,
+    "zh": "成為",
+    "v1": "become",
+    "v1s": "becomes",
+    "ving": "becoming",
+    "v2": "became",
+    "v3": "become"
+  },
+  {
+    "num": 2,
+    "zh": "打倒",
+    "v1": "beat",
+    "v1s": "beats",
+    "ving": "beating",
+    "v2": "beat",
+    "v3": "beaten"
+  },
+  {
+    "num": 3,
+    "zh": "忍受",
+    "v1": "bear",
+    "v1s": "bears",
+    "ving": "bearing",
+    "v2": "bore",
+    "v3": "borne/born"
+  },
+  {
+    "num": 4,
+    "zh": "帶",
+    "v1": "bring",
+    "v1s": "brings",
+    "ving": "bringing",
+    "v2": "brought",
+    "v3": "brought"
+  },
+  {
+    "num": 5,
+    "zh": "買",
+    "v1": "buy",
+    "v1s": "buys",
+    "ving": "buying",
+    "v2": "bought",
+    "v3": "bought"
+  },
+  {
+    "num": 6,
+    "zh": "炸裂",
+    "v1": "burst",
+    "v1s": "bursts",
+    "ving": "bursting",
+    "v2": "burst",
+    "v3": "burst"
+  },
+  {
+    "num": 7,
+    "zh": "廣播",
+    "v1": "broadcast",
+    "v1s": "broadcasts",
+    "ving": "broadcasting",
+    "v2": "broadcast",
+    "v3": "broadcast"
+  },
+  {
+    "num": 8,
+    "zh": "刷",
+    "v1": "brush",
+    "v1s": "brushes",
+    "ving": "brushing",
+    "v2": "brushed",
+    "v3": "brushed"
+  },
+  {
+    "num": 9,
+    "zh": "流血",
+    "v1": "bleed",
+    "v1s": "bleeds",
+    "ving": "bleeding",
+    "v2": "bled",
+    "v3": "bled"
+  },
+  {
+    "num": 10,
+    "zh": "關",
+    "v1": "close",
+    "v1s": "closes",
+    "ving": "closing",
+    "v2": "closed",
+    "v3": "closed"
+  },
+  {
+    "num": 11,
+    "zh": "來",
+    "v1": "come",
+    "v1s": "comes",
+    "ving": "coming",
+    "v2": "came",
+    "v3": "come"
+  },
+  {
+    "num": 12,
+    "zh": "比較",
+    "v1": "compare",
+    "v1s": "compares",
+    "ving": "comparing",
+    "v2": "compared",
+    "v3": "compared"
+  },
+  {
+    "num": 13,
+    "zh": "哭",
+    "v1": "cry",
+    "v1s": "cries",
+    "ving": "crying",
+    "v2": "cried",
+    "v3": "cried"
+  },
+  {
+    "num": 14,
+    "zh": "花費",
+    "v1": "cost",
+    "v1s": "costs",
+    "ving": "costing",
+    "v2": "cost",
+    "v3": "cost"
+  },
+  {
+    "num": 15,
+    "zh": "形容",
+    "v1": "describe",
+    "v1s": "describes",
+    "ving": "describing",
+    "v2": "described",
+    "v3": "described"
+  },
+  {
+    "num": 16,
+    "zh": "喝",
+    "v1": "drink",
+    "v1s": "drinks",
+    "ving": "drinking",
+    "v2": "drank",
+    "v3": "drunk"
+  },
+  {
+    "num": 17,
+    "zh": "駕駛",
+    "v1": "drive",
+    "v1s": "drives",
+    "ving": "driving",
+    "v2": "drove",
+    "v3": "driven"
+  },
+  {
+    "num": 18,
+    "zh": "處理",
+    "v1": "deal",
+    "v1s": "deals",
+    "ving": "dealing",
+    "v2": "dealt",
+    "v3": "dealt"
+  },
+  {
+    "num": 19,
+    "zh": "完成",
+    "v1": "finish",
+    "v1s": "finishes",
+    "ving": "finishing",
+    "v2": "finished",
+    "v3": "finished"
+  },
+  {
+    "num": 20,
+    "zh": "跌下",
+    "v1": "fall",
+    "v1s": "falls",
+    "ving": "falling",
+    "v2": "fell",
+    "v3": "fallen"
+  },
+  {
+    "num": 21,
+    "zh": "找尋",
+    "v1": "find",
+    "v1s": "finds",
+    "ving": "finding",
+    "v2": "found",
+    "v3": "found"
+  },
+  {
+    "num": 22,
+    "zh": "打架",
+    "v1": "fight",
+    "v1s": "fights",
+    "ving": "fighting",
+    "v2": "fought",
+    "v3": "fought"
+  },
+  {
+    "num": 23,
+    "zh": "逃跑",
+    "v1": "flee",
+    "v1s": "flees",
+    "ving": "fleeing",
+    "v2": "fled",
+    "v3": "fled"
+  },
+  {
+    "num": 24,
+    "zh": "飛",
+    "v1": "fly",
+    "v1s": "flies",
+    "ving": "flying",
+    "v2": "flew",
+    "v3": "flown"
+  },
+  {
+    "num": 25,
+    "zh": "預測",
+    "v1": "forecast",
+    "v1s": "forecasts",
+    "ving": "forecasting",
+    "v2": "forecast",
+    "v3": "forecast"
+  },
+  {
+    "num": 26,
+    "zh": "禁止",
+    "v1": "forbid",
+    "v1s": "forbids",
+    "ving": "forbidding",
+    "v2": "forbade",
+    "v3": "forbidden"
+  },
+  {
+    "num": 27,
+    "zh": "原諒",
+    "v1": "forgive",
+    "v1s": "forgives",
+    "ving": "forgiving",
+    "v2": "forgave",
+    "v3": "forgiven"
+  },
+  {
+    "num": 28,
+    "zh": "涷結",
+    "v1": "freeze",
+    "v1s": "freezes",
+    "ving": "freezing",
+    "v2": "froze",
+    "v3": "frozen"
+  },
+  {
+    "num": 29,
+    "zh": "炒",
+    "v1": "fry",
+    "v1s": "fries",
+    "ving": "frying",
+    "v2": "fried",
+    "v3": "fried"
+  },
+  {
+    "num": 30,
+    "zh": "得到",
+    "v1": "get",
+    "v1s": "gets",
+    "ving": "getting",
+    "v2": "got",
+    "v3": "got"
+  },
+  {
+    "num": 31,
+    "zh": "給",
+    "v1": "give",
+    "v1s": "gives",
+    "ving": "giving",
+    "v2": "gave",
+    "v3": "given"
+  },
+  {
+    "num": 32,
+    "zh": "抓住",
+    "v1": "grab",
+    "v1s": "brabs",
+    "ving": "grabbing",
+    "v2": "grabbed",
+    "v3": "grabbed"
+  },
+  {
+    "num": 33,
+    "zh": "懸掛",
+    "v1": "hang",
+    "v1s": "hangs",
+    "ving": "hanging",
+    "v2": "hung",
+    "v3": "hung"
+  },
+  {
+    "num": 34,
+    "zh": "打/擊",
+    "v1": "hit",
+    "v1s": "hits",
+    "ving": "hitting",
+    "v2": "hit",
+    "v3": "hit"
+  },
+  {
+    "num": 35,
+    "zh": "蹦跳",
+    "v1": "hop",
+    "v1s": "hops",
+    "ving": "hopping",
+    "v2": "hopped",
+    "v3": "hopped"
+  },
+  {
+    "num": 36,
+    "zh": "拿著/舉行",
+    "v1": "hold",
+    "v1s": "holds",
+    "ving": "holding",
+    "v2": "held",
+    "v3": "held"
+  },
+  {
+    "num": 37,
+    "zh": "傷害",
+    "v1": "hurt",
+    "v1s": "hurts",
+    "ving": "hurting",
+    "v2": "hurt",
+    "v3": "hurt"
+  },
+  {
+    "num": 38,
+    "zh": "保存",
+    "v1": "keep",
+    "v1s": "keeps",
+    "ving": "keeping",
+    "v2": "kept",
+    "v3": "kept"
+  },
+  {
+    "num": 39,
+    "zh": "帶領",
+    "v1": "lead",
+    "v1s": "leads",
+    "ving": "leading",
+    "v2": "led",
+    "v3": "led"
+  },
+  {
+    "num": 40,
+    "zh": "讓",
+    "v1": "let",
+    "v1s": "lets",
+    "ving": "letting",
+    "v2": "let",
+    "v3": "let"
+  },
+  {
+    "num": 41,
+    "zh": "說謊",
+    "v1": "lie",
+    "v1s": "lies",
+    "ving": "lying",
+    "v2": "lied",
+    "v3": "lied"
+  },
+  {
+    "num": 42,
+    "zh": "平躺",
+    "v1": "lie",
+    "v1s": "lies",
+    "ving": "lying",
+    "v2": "lay",
+    "v3": "lain"
+  },
+  {
+    "num": 43,
+    "zh": "借出",
+    "v1": "lend",
+    "v1s": "lends",
+    "ving": "lending",
+    "v2": "lent",
+    "v3": "lent"
+  },
+  {
+    "num": 44,
+    "zh": "點燃",
+    "v1": "light",
+    "v1s": "lights",
+    "ving": "lighting",
+    "v2": "lighted",
+    "v3": "lighted"
+  },
+  {
+    "num": 45,
+    "zh": "誤認",
+    "v1": "mistake",
+    "v1s": "mistakes",
+    "ving": "mistaking",
+    "v2": "mistook",
+    "v3": "mistaken"
+  },
+  {
+    "num": 46,
+    "zh": "命令/落單",
+    "v1": "order",
+    "v1s": "orders",
+    "ving": "ordering",
+    "v2": "ordered",
+    "v3": "ordered"
+  },
+  {
+    "num": 47,
+    "zh": "克服",
+    "v1": "overcome",
+    "v1s": "overcomes",
+    "ving": "overcoming",
+    "v2": "overcame",
+    "v3": "overcome"
+  },
+  {
+    "num": 48,
+    "zh": "油顏色",
+    "v1": "paint",
+    "v1s": "paints",
+    "ving": "painting",
+    "v2": "painted",
+    "v3": "painted"
+  },
+  {
+    "num": 49,
+    "zh": "放",
+    "v1": "put",
+    "v1s": "puts",
+    "ving": "putting",
+    "v2": "put",
+    "v3": "put"
+  },
+  {
+    "num": 50,
+    "zh": "看書",
+    "v1": "read",
+    "v1s": "reads",
+    "ving": "reading",
+    "v2": "read",
+    "v3": "read"
+  },
+  {
+    "num": 51,
+    "zh": "排練",
+    "v1": "rehearse",
+    "v1s": "rehearse",
+    "ving": "rehearsing",
+    "v2": "rehearsed",
+    "v3": "rehearsed"
+  },
+  {
+    "num": 52,
+    "zh": "休息",
+    "v1": "rest",
+    "v1s": "rests",
+    "ving": "resting",
+    "v2": "rested",
+    "v3": "rested"
+  },
+  {
+    "num": 53,
+    "zh": "響",
+    "v1": "ring",
+    "v1s": "rings",
+    "ving": "ringing",
+    "v2": "rang",
+    "v3": "rung"
+  },
+  {
+    "num": 54,
+    "zh": "跑",
+    "v1": "run",
+    "v1s": "runs",
+    "ving": "running",
+    "v2": "ran",
+    "v3": "run"
+  },
+  {
+    "num": 55,
+    "zh": "賣",
+    "v1": "sell",
+    "v1s": "sells",
+    "ving": "selling",
+    "v2": "sold",
+    "v3": "sold"
+  },
+  {
+    "num": 56,
+    "zh": "找",
+    "v1": "seek",
+    "v1s": "seeks",
+    "ving": "seeking",
+    "v2": "sought",
+    "v3": "sought"
+  },
+  {
+    "num": 57,
+    "zh": "照耀/發光",
+    "v1": "shine",
+    "v1s": "shines",
+    "ving": "shining",
+    "v2": "shone",
+    "v3": "shone"
+  },
+  {
+    "num": 58,
+    "zh": "縮小",
+    "v1": "shrink",
+    "v1s": "shrinks",
+    "ving": "shrinking",
+    "v2": "shrank",
+    "v3": "shrunk"
+  },
+  {
+    "num": 59,
+    "zh": "出示/展示",
+    "v1": "show",
+    "v1s": "shows",
+    "ving": "showing",
+    "v2": "showed",
+    "v3": "showen"
+  },
+  {
+    "num": 60,
+    "zh": "站立",
+    "v1": "stand",
+    "v1s": "stands",
+    "ving": "standing",
+    "v2": "stood",
+    "v3": "stood"
+  },
+  {
+    "num": 61,
+    "zh": "撞擊/罷工",
+    "v1": "strike",
+    "v1s": "strikes",
+    "ving": "striking",
+    "v2": "struck",
+    "v3": "struck"
+  },
+  {
+    "num": 62,
+    "zh": "發誓/詛咒",
+    "v1": "swear",
+    "v1s": "swears",
+    "ving": "swearing",
+    "v2": "swore",
+    "v3": "sworn"
+  },
+  {
+    "num": 63,
+    "zh": "搖晃",
+    "v1": "swing",
+    "v1s": "swings",
+    "ving": "swinging",
+    "v2": "swung",
+    "v3": "swung"
+  },
+  {
+    "num": 64,
+    "zh": "下雪",
+    "v1": "snow",
+    "v1s": "snows",
+    "ving": "snowing",
+    "v2": "snowed",
+    "v3": "snowed"
+  },
+  {
+    "num": 65,
+    "zh": "偷",
+    "v1": "steal",
+    "v1s": "steals",
+    "ving": "stealing",
+    "v2": "stole",
+    "v3": "stolen"
+  },
+  {
+    "num": 66,
+    "zh": "拼寫",
+    "v1": "spell",
+    "v1s": "spells",
+    "ving": "spelling",
+    "v2": "spelt/spelled",
+    "v3": "spelt/spelled"
+  },
+  {
+    "num": 67,
+    "zh": "花費/用",
+    "v1": "spend",
+    "v1s": "spends",
+    "ving": "spending",
+    "v2": "spent",
+    "v3": "spent"
+  },
+  {
+    "num": 68,
+    "zh": "撕",
+    "v1": "tear",
+    "v1s": "tears",
+    "ving": "tearing",
+    "v2": "tore",
+    "v3": "torn"
+  },
+  {
+    "num": 69,
+    "zh": "扔/丟",
+    "v1": "throw",
+    "v1s": "throws",
+    "ving": "throwing",
+    "v2": "threw",
+    "v3": "thrown"
+  },
+  {
+    "num": 70,
+    "zh": "教",
+    "v1": "teach",
+    "v1s": "teaches",
+    "ving": "teaching",
+    "v2": "taught",
+    "v3": "taught"
+  },
+  {
+    "num": 71,
+    "zh": "旅遊",
+    "v1": "travel",
+    "v1s": "travels",
+    "ving": "travelling",
+    "v2": "travelled",
+    "v3": "travelled"
+  },
+  {
+    "num": 72,
+    "zh": "起床/喚醒",
+    "v1": "wake",
+    "v1s": "wakes",
+    "ving": "waking",
+    "v2": "woke",
+    "v3": "waken"
+  },
+  {
+    "num": 73,
+    "zh": "穿",
+    "v1": "wear",
+    "v1s": "wears",
+    "ving": "wearing",
+    "v2": "wore",
+    "v3": "worn"
+  },
+  {
+    "num": 74,
+    "zh": "編織",
+    "v1": "weave",
+    "v1s": "weaves",
+    "ving": "weaving",
+    "v2": "wove",
+    "v3": "woven"
+  },
+  {
+    "num": 75,
+    "zh": "將",
+    "v1": "will",
+    "v1s": "-",
+    "ving": "-",
+    "v2": "would",
+    "v3": "-"
+  },
+  {
+    "num": 76,
+    "zh": "洗",
+    "v1": "wash",
+    "v1s": "washes",
+    "ving": "washing",
+    "v2": "washed",
+    "v3": "washed"
+  },
+  {
+    "num": 77,
+    "zh": "觀看",
+    "v1": "watch",
+    "v1s": "watches",
+    "ving": "watching",
+    "v2": "watched",
+    "v3": "watched"
+  },
+  {
+    "num": 78,
+    "zh": "工作",
+    "v1": "work",
+    "v1s": "works",
+    "ving": "working",
+    "v2": "worked",
+    "v3": "worked"
+  },
+  {
+    "num": 79,
+    "zh": "包裹",
+    "v1": "wrap",
+    "v1s": "warps",
+    "ving": "wrapping",
+    "v2": "wrapped",
+    "v3": "wrapped"
+  },
+  {
+    "num": 80,
+    "zh": "叫喊",
+    "v1": "yell",
+    "v1s": "yells",
+    "ving": "yelling",
+    "v2": "yelled",
+    "v3": "yelled"
+  }
+]

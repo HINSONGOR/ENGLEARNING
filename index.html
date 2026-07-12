@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ PARTICLE CANVAS (full screen overlay) ============ -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- ============ TOASTS ============ -->
+<div id="toast-container"></div>
+
+<!-- ============ TOP BAR (visible on all app screens) ============ -->
+<header id="topbar" class="hidden">
+  <div class="topbar-left">
+    <button id="btn-home" class="icon-btn" title="返回主頁">🏠</button>
+    <div class="player-chip">
+      <span id="player-house-icon" class="house-icon">🦁</span>
+      <span id="player-name">巫師</span>
+    </div>
+  </div>
+  <div class="topbar-mid">
+    <div class="level-badge">
+      <span>LV.</span><span id="player-level">1</span>
+    </div>
+    <div class="xp-bar-wrap" title="經驗值">
+      <div class="xp-bar"><div id="xp-fill" class="xp-fill"></div></div>
+      <span id="xp-text">0 / 100 XP</span>
+    </div>
+    <div class="coin-chip" title="金幣">
+      <span class="coin-icon">🪙</span><span id="player-coins">0</span>
+    </div>
+    <div class="streak-chip" title="連續登入天數">
+      <span class="flame-icon">🔥</span><span id="player-streak">0</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button id="btn-daily-reward" class="icon-btn" title="每日獎勵">🎁</button>
+    <button id="btn-music-toggle" class="icon-btn" title="背景音樂">🎵</button>
+    <button id="btn-settings" class="icon-btn" title="設定">⚙️</button>
+    <button id="btn-parent-mode" class="icon-btn" title="家長模式">🔒</button>
+  </div>
+</header>
+
+<!-- ============ SCREEN: LOGIN ============ -->
+<section id="screen-login" class="screen active">
+  <div class="login-card block-panel">
+    <h1 class="game-title">✨ HINSON ENG ADVENTURE ✨</h1>
+    <p class="game-subtitle">魔法英語大冒險 — Primary 6 呈分試特訓</p>
+
+    <div class="login-form">
+      <label for="input-name">你的魔法名字：</label>
+      <input type="text" id="input-name" maxlength="12" placeholder="請輸入你的名字">
+
+      <label>選擇你的學院：</label>
+      <div class="house-grid" id="house-grid">
+        <button class="house-card" data-house="gryffindor">
+          <span class="house-emoji">🦁</span><span>格蘭芬多</span>
+        </button>
+        <button class="house-card" data-house="slytherin">
+          <span class="house-emoji">🐍</span><span>史萊哲林</span>
+        </button>
+        <button class="house-card" data-house="ravenclaw">
+          <span class="house-emoji">🦅</span><span>拉文克勞</span>
+        </button>
+        <button class="house-card" data-house="hufflepuff">
+          <span class="house-emoji">🦡</span><span>赫夫帕夫</span>
+        </button>
+      </div>
+
+      <button id="btn-start-adventure" class="btn-primary btn-big">🪄 開始冒險！</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: DASHBOARD ============ -->
+<section id="screen-dashboard" class="screen">
+  <div class="dashboard-wrap">
+    <div class="banner-card block-panel">
+      <h2 id="dash-welcome">歡迎回來，小巫師！</h2>
+      <p class="dash-sub">今日都要努力學魔法英語咒語（文法）喔！挑選一個關卡開始練習啦 🧙</p>
+    </div>
+
+    <div class="module-section">
+      <h3 class="section-title">📕 Unit 1　零條件句 &amp; too/enough</h3>
+      <div class="module-grid">
+        <button class="module-card" data-module="u1l1">
+          <span class="module-icon">🌦️</span>
+          <span class="module-title">1.1 Zero Conditional<br>零條件句</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u1l1"></span></span></span>
+        </button>
+        <button class="module-card" data-module="u1l2">
+          <span class="module-icon">📏</span>
+          <span class="module-title">1.2 too / enough<br>太／足夠</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u1l2"></span></span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="module-section">
+      <h3 class="section-title">📗 Unit 2　第一條件句 &amp; although</h3>
+      <div class="module-grid">
+        <button class="module-card" data-module="u2l1">
+          <span class="module-icon">🌧️</span>
+          <span class="module-title">2.1 First Conditional<br>第一條件句</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u2l1"></span></span></span>
+        </button>
+        <button class="module-card" data-module="u2l2">
+          <span class="module-icon">⚖️</span>
+          <span class="module-title">2.2 although<br>對比句</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u2l2"></span></span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="module-section">
+      <h3 class="section-title">📙 Unit 3　形容詞副詞 &amp; be going to / might</h3>
+      <div class="module-grid">
+        <button class="module-card" data-module="u3l1">
+          <span class="module-icon">🎯</span>
+          <span class="module-title">3.1 Adjective / Adverb<br>形容詞與副詞</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u3l1"></span></span></span>
+        </button>
+        <button class="module-card" data-module="u3l2">
+          <span class="module-icon">🔮</span>
+          <span class="module-title">3.2 be going to / might<br>計劃與可能</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u3l2"></span></span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="module-section">
+      <h3 class="section-title">📘 Unit 4　since/for &amp; to-infinitives</h3>
+      <div class="module-grid">
+        <button class="module-card" data-module="u4l1">
+          <span class="module-icon">⏳</span>
+          <span class="module-title">4.1 since / for<br>時間長度</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u4l1"></span></span></span>
+        </button>
+        <button class="module-card" data-module="u4l2">
+          <span class="module-icon">➡️</span>
+          <span class="module-title">4.2 To-infinitives<br>不定詞</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u4l2"></span></span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="module-section">
+      <h3 class="section-title">📓 Unit 5　被動語態 &amp; made in/by/from</h3>
+      <div class="module-grid">
+        <button class="module-card" data-module="u5l1">
+          <span class="module-icon">🏭</span>
+          <span class="module-title">5.1 Passive Voice<br>被動語態</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u5l1"></span></span></span>
+        </button>
+        <button class="module-card" data-module="u5l2">
+          <span class="module-icon">🏷️</span>
+          <span class="module-title">5.2 made in/by/from<br>製造來源</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="u5l2"></span></span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="module-section">
+      <h3 class="section-title">🌟 特別關卡</h3>
+      <div class="module-grid">
+        <button class="module-card special" data-module="verb">
+          <span class="module-icon">📖</span>
+          <span class="module-title">VERB<br>動詞天地</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="verb"></span></span></span>
+        </button>
+        <button class="module-card special" data-module="tense">
+          <span class="module-icon">📝</span>
+          <span class="module-title">TENSE<br>時態魔法</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="tense"></span></span></span>
+        </button>
+        <button class="module-card special" data-module="reading">
+          <span class="module-icon">📚</span>
+          <span class="module-title">閱讀理解<br>Reading Room</span>
+          <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="reading"></span></span></span>
+        </button>
+        <button class="module-card special" id="btn-wrong-center">
+          <span class="module-icon">🏆</span>
+          <span class="module-title">錯題重溫中心<br><span id="wrong-count-badge">0 題待複習</span></span>
+        </button>
+        <button class="module-card special" id="btn-report-center">
+          <span class="module-icon">📈</span>
+          <span class="module-title">學習報告中心<br>我的進度</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: LESSON NOTES ============ -->
+<section id="screen-notes" class="screen">
+  <div class="notes-wrap">
+    <div class="spellbook block-panel">
+      <h2 id="notes-title">課文重點</h2>
+      <div id="notes-body" class="notes-body"></div>
+      <div class="notes-actions">
+        <label class="timer-toggle">
+          <input type="checkbox" id="chk-timer-mode"> ⏱️ 計時模式（每題 30 秒）
+        </label>
+        <button id="btn-start-quiz" class="btn-primary btn-big">⚔️ 開始挑戰！</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: QUIZ ============ -->
+<section id="screen-quiz" class="screen">
+  <div class="quiz-wrap">
+    <div class="quiz-hud">
+      <div class="quiz-progress">
+        <span id="quiz-progress-text">第 1 / 7 題</span>
+        <div class="bar quiz-progress-bar"><span class="bar-fill" id="quiz-progress-fill"></span></div>
+      </div>
+      <div id="timer-wrap" class="timer-wrap hidden">
+        <span class="timer-icon">⏳</span>
+        <div class="bar timer-bar"><span class="bar-fill timer-fill" id="timer-fill"></span></div>
+        <span id="timer-text">30</span>
+      </div>
+    </div>
+
+    <div class="quiz-card block-panel" id="quiz-card">
+      <div class="quiz-question-row">
+        <p id="quiz-question-text" class="quiz-question-text"></p>
+        <button id="btn-speak-question" class="icon-btn speaker-btn" title="用廣東話讀出問題">🔊</button>
+      </div>
+
+      <div id="quiz-passage-box" class="passage-box hidden"></div>
+
+      <div id="quiz-options" class="quiz-options"></div>
+
+      <div id="quiz-fill-wrap" class="quiz-fill-wrap hidden">
+        <input type="text" id="quiz-fill-input" placeholder="請輸入你的答案...">
+      </div>
+
+      <button id="btn-submit-answer" class="btn-primary btn-big">✅ 提交答案</button>
+
+      <div id="feedback-box" class="feedback-box hidden">
+        <div id="feedback-result" class="feedback-result"></div>
+        <div class="teacher-panel">
+          <div class="teacher-avatar">🧙‍♂️</div>
+          <div class="teacher-text">
+            <strong>小老師講解：</strong>
+            <p id="teacher-explanation"></p>
+          </div>
+        </div>
+        <button id="btn-next-question" class="btn-primary btn-big">➡️ 下一題</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: RESULT ============ -->
+<section id="screen-result" class="screen">
+  <div class="result-wrap">
+    <div class="result-card block-panel">
+      <h2 id="result-title">🎉 挑戰完成！</h2>
+      <div class="result-stats">
+        <div class="result-stat"><span class="stat-num" id="result-score">0</span><span>分數</span></div>
+        <div class="result-stat"><span class="stat-num" id="result-accuracy">0%</span><span>準確率</span></div>
+        <div class="result-stat"><span class="stat-num" id="result-xp">+0</span><span>經驗值</span></div>
+        <div class="result-stat"><span class="stat-num" id="result-coins">+0</span><span>金幣</span></div>
+      </div>
+      <div id="result-badge" class="result-badge hidden">
+        <span class="badge-icon">🏅</span>
+        <span id="result-badge-text">解鎖新徽章！</span>
+      </div>
+      <div class="result-actions">
+        <button id="btn-retry-wrong" class="btn-secondary">🔁 重做錯題</button>
+        <button id="btn-retry-all" class="btn-secondary">🔄 再挑戰一次</button>
+        <button id="btn-back-dashboard" class="btn-primary">🏠 返回主頁</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: WRONG QUESTION CENTER ============ -->
+<section id="screen-wrongcenter" class="screen">
+  <div class="wrongcenter-wrap">
+    <div class="block-panel">
+      <h2>🏆 錯題重溫中心</h2>
+      <p class="dash-sub">呢度收集晒你之前答錯嘅題目，溫習到熟為止！</p>
+      <div class="wrong-filter-row">
+        <select id="wrong-filter-module">
+          <option value="all">全部單元</option>
+        </select>
+        <button id="btn-retry-filtered" class="btn-primary">⚔️ 重新測試呢批錯題</button>
+        <button id="btn-clear-mastered" class="btn-secondary">🧹 清除已掌握</button>
+      </div>
+      <div id="wrong-list" class="wrong-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: REPORT CENTER ============ -->
+<section id="screen-report" class="screen">
+  <div class="report-wrap">
+    <div class="block-panel">
+      <h2>📈 學習報告中心</h2>
+      <div class="report-summary-grid">
+        <div class="report-summary-card"><span class="stat-num" id="report-total-attempted">0</span><span>已做題目</span></div>
+        <div class="report-summary-card"><span class="stat-num" id="report-overall-accuracy">0%</span><span>整體準確率</span></div>
+        <div class="report-summary-card"><span class="stat-num" id="report-level">1</span><span>目前等級</span></div>
+        <div class="report-summary-card"><span class="stat-num" id="report-badges-count">0</span><span>已獲徽章</span></div>
+      </div>
+
+      <h3 class="section-title">📊 各單元準確率</h3>
+      <div id="report-topic-chart" class="report-topic-chart"></div>
+
+      <h3 class="section-title">⚠️ 弱點分析</h3>
+      <div id="report-weakness" class="report-weakness"></div>
+
+      <h3 class="section-title">🏅 我的徽章</h3>
+      <div id="report-badges" class="report-badges"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: VERB BLASTER GAME (embedded) ============ -->
+<section id="screen-verb-game" class="screen">
+  <div class="verbgame-wrap">
+    <iframe id="verb-game-frame" src="verb_blaster.html" title="Verb Blaster"></iframe>
+  </div>
+</section>
+
+<!-- ============ SCREEN: READING COMPREHENSION ============ -->
+<section id="screen-reading-list" class="screen">
+  <div class="dashboard-wrap">
+    <div class="block-panel">
+      <h2>📚 閱讀理解 Reading Room</h2>
+      <p class="dash-sub">睇下面嘅文章，然後回答問題啦！</p>
+      <div class="module-grid" id="reading-passage-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: PARENT MODE - PIN ============ -->
+<section id="screen-parent-pin" class="screen">
+  <div class="login-card block-panel">
+    <h2>🔒 家長模式</h2>
+    <p class="dash-sub">請輸入 4 位數家長密碼（預設：0000）</p>
+    <input type="password" id="parent-pin-input" maxlength="4" inputmode="numeric" class="pin-input" placeholder="••••">
+    <p id="parent-pin-error" class="error-text hidden">密碼錯誤，請再試一次</p>
+    <div class="result-actions">
+      <button id="btn-parent-pin-cancel" class="btn-secondary">取消</button>
+      <button id="btn-parent-pin-submit" class="btn-primary">解鎖</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: PARENT DASHBOARD ============ -->
+<section id="screen-parent-dash" class="screen">
+  <div class="dashboard-wrap">
+    <div class="block-panel">
+      <div class="parent-tabs">
+        <button class="parent-tab active" data-tab="stats">📊 學習統計</button>
+        <button class="parent-tab" data-tab="bank">📋 題目管理</button>
+        <button class="parent-tab" data-tab="import">📥 匯入題目</button>
+        <button class="parent-tab" data-tab="settings">⚙️ 設定</button>
+        <button id="btn-parent-exit" class="btn-secondary">🚪 離開家長模式</button>
+      </div>
+
+      <div id="parent-tab-stats" class="parent-tab-content active">
+        <h3 class="section-title">學習統計</h3>
+        <div id="parent-stats-summary" class="report-summary-grid"></div>
+        <h3 class="section-title">各單元準確率</h3>
+        <div id="parent-topic-accuracy" class="report-topic-chart"></div>
+        <h3 class="section-title">⚠️ 弱點分析</h3>
+        <div id="parent-weakness" class="report-weakness"></div>
+      </div>
+
+      <div id="parent-tab-bank" class="parent-tab-content">
+        <h3 class="section-title">新增題目</h3>
+        <form id="form-add-question" class="add-question-form">
+          <div class="form-row">
+            <label>單元 Module</label>
+            <select id="q-module"></select>
+            <label>題型</label>
+            <select id="q-type">
+              <option value="mcq">選擇題 MCQ</option>
+              <option value="fill">填充題 Fill-in</option>
+            </select>
+          </div>
+          <label>題目內容</label>
+          <textarea id="q-text" rows="2" placeholder="輸入題目文字..."></textarea>
+          <div id="q-mcq-options" class="q-mcq-options">
+            <label>選項 A</label><input type="text" class="q-opt" data-idx="0">
+            <label>選項 B</label><input type="text" class="q-opt" data-idx="1">
+            <label>選項 C</label><input type="text" class="q-opt" data-idx="2">
+            <label>選項 D</label><input type="text" class="q-opt" data-idx="3">
+            <label>正確選項</label>
+            <select id="q-correct-idx">
+              <option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option>
+            </select>
+          </div>
+          <div id="q-fill-answer" class="q-fill-answer hidden">
+            <label>正確答案（可用「，」分隔多個可接受答案）</label>
+            <input type="text" id="q-fill-answer-input">
+          </div>
+          <label>小老師講解（解釋答案）</label>
+          <textarea id="q-explanation" rows="2" placeholder="解釋為何這是正確答案..."></textarea>
+          <button type="submit" class="btn-primary">➕ 新增題目</button>
+        </form>
+
+        <h3 class="section-title">現有題目（家長自訂）</h3>
+        <div id="parent-question-list" class="parent-question-list"></div>
+      </div>
+
+      <div id="parent-tab-import" class="parent-tab-content">
+        <h3 class="section-title">匯入題目（PDF / Word / 圖片 / 文字）</h3>
+        <p class="dash-sub">上載檔案 → 如果係圖片會喺下面預覽；PDF / Word 檔請將題目內容貼上或於文字框輸入 → 按「自動分類」自動歸類單元 → 檢查後按「確認匯入」。</p>
+        <input type="file" id="import-file-input" accept=".txt,.pdf,.docx,.doc,.png,.jpg,.jpeg">
+        <div id="import-preview" class="import-preview"></div>
+        <textarea id="import-textarea" rows="8" placeholder="每題用 Q1. Q2. ... 開頭，貼上或輸入題目內容（可包含選項 A) B) C) D)）"></textarea>
+        <div class="form-row">
+          <button id="btn-auto-categorize" class="btn-secondary">🪄 自動分類</button>
+          <button id="btn-confirm-import" class="btn-primary">✅ 確認匯入</button>
+        </div>
+        <div id="import-preview-list" class="parent-question-list"></div>
+      </div>
+
+      <div id="parent-tab-settings" class="parent-tab-content">
+        <h3 class="section-title">家長設定</h3>
+        <div class="form-row">
+          <label>更改家長密碼（4位數字）</label>
+          <input type="password" id="new-parent-pin" maxlength="4" inputmode="numeric" class="pin-input-inline">
+          <button id="btn-change-pin" class="btn-secondary">更新密碼</button>
+        </div>
+        <div class="form-row">
+          <button id="btn-reset-progress" class="btn-secondary danger">⚠️ 重設所有學習進度</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODAL: DAILY REWARD ============ -->
+<div id="modal-daily-reward" class="modal-overlay hidden">
+  <div class="modal-box block-panel">
+    <h2>🎁 每日登入獎勵！</h2>
+    <p id="daily-reward-day-text">連續登入第 1 天</p>
+    <div class="daily-reward-track" id="daily-reward-track"></div>
+    <p id="daily-reward-earned" class="daily-reward-earned"></p>
+    <button id="btn-claim-daily-reward" class="btn-primary btn-big">收下獎勵！</button>
+  </div>
+</div>
+
+<!-- ============ MODAL: LEVEL UP ============ -->
+<div id="modal-levelup" class="modal-overlay hidden">
+  <div class="modal-box block-panel levelup-box">
+    <h2>⭐ 升級了！⭐</h2>
+    <p>你現在是 <span id="levelup-new-level">2</span> 級魔法師！</p>
+    <button id="btn-close-levelup" class="btn-primary">太好了！</button>
+  </div>
+</div>
+
+<!-- ============ MODAL: SETTINGS ============ -->
+<div id="modal-settings" class="modal-overlay hidden">
+  <div class="modal-box block-panel">
+    <h2>⚙️ 設定</h2>
+    <div class="settings-row">
+      <label>🎵 背景音樂</label>
+      <label class="switch"><input type="checkbox" id="chk-music-on"><span class="slider"></span></label>
+    </div>
+    <div class="settings-row">
+      <label>🔊 音量</label>
+      <input type="range" id="range-music-volume" min="0" max="100" value="50">
+    </div>
+    <div class="settings-row">
+      <label>🔔 音效</label>
+      <label class="switch"><input type="checkbox" id="chk-sfx-on" checked><span class="slider"></span></label>
+    </div>
+    <div class="settings-row">
+      <label>🗣️ 廣東話讀題速度</label>
+      <input type="range" id="range-tts-rate" min="50" max="150" value="90">
+    </div>
+    <button id="btn-close-settings" class="btn-primary">完成</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

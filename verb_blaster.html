@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verb Blaster — Mario Kart Tense Game</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px;font-family:Arial,sans-serif;}
+#app{width:100%;max-width:900px;background:#16213e;border-radius:20px;padding:36px;border:3px solid #0f3460;position:relative;overflow:hidden;font-size:1.2em;}
+.px{font-family:'Press Start 2P',monospace;}
+.screen{display:none;}
+.screen.active{display:block;}
+#flash{position:absolute;inset:0;pointer-events:none;opacity:0;border-radius:14px;z-index:10;transition:opacity .18s;}
+
+/* ── BUTTONS ── */
+.bb{font-size:13px;padding:14px 24px;border-radius:12px;cursor:pointer;border:2px solid #e94560;background:#e94560;color:#fff;font-family:'Press Start 2P',monospace;transition:all .15s;}
+.bb:hover{background:#c53030;border-color:#c53030;transform:scale(1.03);}
+.bb:active{transform:scale(.97);}
+.bb-out{background:transparent;color:#e94560;}
+.bb-out:hover{background:#e94560;color:#fff;}
+.bb-blue{border-color:#63b3ed;background:#63b3ed;color:#1a1a2e;}
+.bb-blue:hover{background:#3182ce;border-color:#3182ce;color:#fff;}
+.bb-green{border-color:#48bb78;background:#48bb78;color:#1a1a2e;}
+.bb-green:hover{background:#2f855a;border-color:#2f855a;color:#fff;}
+.bb-yellow{border-color:#f6e05e;background:#f6e05e;color:#1a1a2e;}
+.bb-yellow:hover{background:#d69e2e;border-color:#d69e2e;}
+.bb-purple{border-color:#b794f4;background:#b794f4;color:#1a1a2e;}
+.bb-purple:hover{background:#805ad5;border-color:#805ad5;color:#fff;}
+.bb-sm{font-size:11px;padding:9px 16px;}
+.bb-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+
+/* ── START SCREEN ── */
+#sstitle{font-size:24px;line-height:2;margin-bottom:20px;color:#f6e05e;text-align:center;}
+.eg{font-size:15px;color:#a0aec0;line-height:2.5;margin-bottom:16px;background:#0f3460;border-radius:12px;padding:16px;border:1px solid #e94560;}
+.eg strong{color:#f0e68c;}
+#namerow{display:flex;gap:12px;align-items:center;margin-bottom:16px;}
+#namerow label{font-size:12px;color:#a0aec0;white-space:nowrap;font-family:'Press Start 2P',monospace;}
+#pname{flex:1;background:#0f3460;border:2px solid #e94560;color:#f0e68c;padding:14px 16px;border-radius:10px;font-size:18px;outline:none;}
+#pname:focus{border-color:#f6e05e;}
+#pname::placeholder{color:#4a5568;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+.mode-card{background:#0f3460;border:2px solid;border-radius:14px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .15s;}
+.mode-card:hover{transform:scale(1.04);}
+.mode-card .mc-icon{font-size:32px;margin-bottom:10px;}
+.mode-card .mc-title{font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.7;}
+.mode-card .mc-sub{font-size:13px;color:#a0aec0;margin-top:8px;}
+.mc-classic{border-color:#e94560;color:#e94560;}
+.mc-study{border-color:#f6e05e;color:#f6e05e;}
+.mc-review{border-color:#b794f4;color:#b794f4;}
+.mc-badge{font-size:11px;background:#b794f4;color:#1a1a2e;padding:3px 9px;border-radius:5px;margin-top:8px;display:inline-block;font-family:'Press Start 2P',monospace;}
+
+/* ── HUD ── */
+#hud{display:flex;gap:12px;margin-bottom:14px;}
+.hc{flex:1;background:#0f3460;border-radius:12px;padding:10px 10px;text-align:center;border:1px solid #e94560;}
+.hl{font-size:11px;color:#a0aec0;margin-bottom:4px;font-family:'Press Start 2P',monospace;}
+.hv{font-size:24px;font-weight:bold;color:#f0e68c;}
+
+/* ── TRACK PROGRESS ── */
+#trow{display:flex;align-items:center;gap:6px;margin-bottom:14px;}
+.ts{flex:1;height:17px;border-radius:4px;background:#0f3460;border:1px solid #e94560;transition:background .25s;}
+.ts.done{background:#48bb78;}
+.ts.cur{background:#ed8936;}
+#tlabel{font-size:11px;color:#fc8181;white-space:nowrap;padding-left:6px;font-family:'Press Start 2P',monospace;}
+
+/* ── REVIEW PROGRESS ── */
+#revprog{display:none;text-align:center;margin-bottom:14px;font-size:13px;color:#b794f4;font-family:'Press Start 2P',monospace;}
+
+/* ── BOSS ── */
+#bsec{display:none;margin-bottom:14px;background:#0f3460;border-radius:12px;padding:13px;border:1px solid #e94560;}
+#bname{font-size:12px;color:#fc8181;font-weight:bold;text-align:center;margin-bottom:8px;font-family:'Press Start 2P',monospace;}
+#bhbar{height:14px;background:#1a1a2e;border-radius:7px;overflow:hidden;}
+#bhf{height:100%;border-radius:7px;background:#e94560;transition:width .3s;}
+
+/* ── TIMER ── */
+#tibar{height:12px;background:#0f3460;border-radius:6px;overflow:hidden;margin-bottom:14px;}
+#tifill{height:100%;border-radius:6px;transition:width .07s linear;}
+
+/* ── VERB SIGN ── */
+#combo{font-size:13px;text-align:center;min-height:20px;margin-bottom:4px;color:#f6e05e;font-family:'Press Start 2P',monospace;}
+#vsign{border:4px solid #BA7517;border-radius:14px;text-align:center;padding:26px 18px 18px;margin:8px 0;position:relative;background:#FAC775;}
+#vsign.study-mode{background:#dbeafe;border-color:#3182ce;}
+#vsign.review-mode{background:#f3e8ff;border-color:#805ad5;}
+#vsign::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:6px;height:12px;background:#888;}
+#vdisp{font-family:'Press Start 2P',monospace;color:#412402;line-height:1.4;}
+#vsign.study-mode #vdisp{color:#1e3a5f;}
+#vsign.review-mode #vdisp{color:#44337a;}
+#vsub{font-size:18px;color:#7a5b00;margin-top:8px;min-height:22px;}
+#vsign.study-mode #vsub{color:#2b6cb0;}
+#vsign.review-mode #vsub{color:#553c9a;}
+#qtype{font-size:15px;text-align:center;color:#a0aec0;margin-bottom:10px;}
+#ainput{display:block;width:100%;font-size:26px;text-align:center;padding:16px;border-radius:12px;border:2px solid #e94560;background:#0f3460;color:#f0e68c;outline:none;}
+#ainput:focus{border-color:#f6e05e;}
+#ainput::placeholder{color:#4a5568;font-size:16px;}
+#fb{font-size:16px;text-align:center;min-height:24px;margin:9px 0;font-weight:bold;}
+
+/* ── COUNTDOWN ── */
+#cd{text-align:center;padding:40px 0;}
+#cdtxt{font-family:'Press Start 2P',monospace;font-size:72px;display:inline-block;}
+
+/* ── GAME OVER ── */
+#gotitle{font-size:18px;line-height:1.8;margin-bottom:14px;color:#f6e05e;text-align:center;}
+#fscore{font-size:15px;color:#a0aec0;margin-bottom:10px;line-height:2.2;text-align:center;}
+#fscore strong{color:#f0e68c;}
+#frank{font-size:13px;color:#68d391;text-align:center;margin-bottom:12px;font-family:'Press Start 2P',monospace;min-height:18px;}
+#rev{text-align:left;margin-top:12px;}
+#rev h4{font-size:12px;font-weight:bold;color:#f6e05e;margin-bottom:10px;text-align:center;font-family:'Press Start 2P',monospace;}
+.rc{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #e94560;border-radius:10px;margin-bottom:8px;background:#0f3460;flex-wrap:wrap;}
+.rv{font-family:'Press Start 2P',monospace;font-size:12px;color:#f0e68c;min-width:80px;}
+.rt{font-size:11px;color:#fc8181;background:#1a1a2e;padding:3px 8px;border-radius:5px;}
+.rw{font-size:14px;color:#fc8181;text-decoration:line-through;}
+.rr{font-size:14px;color:#48bb78;font-weight:bold;}
+.rar{color:#4a5568;font-size:13px;}
+
+/* ── LEADERBOARD ── */
+#lbtitle{font-size:16px;line-height:1.8;margin-bottom:16px;color:#f6e05e;text-align:center;}
+#lbtable{width:100%;border-collapse:collapse;font-size:14px;}
+#lbtable th{font-family:'Press Start 2P',monospace;font-size:10px;color:#a0aec0;padding:9px 6px;border-bottom:1px solid #0f3460;text-align:left;}
+#lbtable td{padding:10px 6px;border-bottom:1px solid #0f3460;color:#f0e68c;vertical-align:middle;}
+#lbtable tr.rank1 td{color:#f6e05e;}
+#lbtable tr.rank2 td{color:#a0aec0;}
+#lbtable tr.rank3 td{color:#ed8936;}
+#lbtable tr.me td{background:rgba(99,179,237,.12);color:#63b3ed;}
+.medal{font-size:16px;}
+
+/* ── CUSTOM VERBS ── */
+#cvtitle{font-size:15px;line-height:1.8;margin-bottom:16px;color:#f6e05e;text-align:center;}
+.cv-form{background:#0f3460;border-radius:12px;padding:16px;border:1px solid #e94560;margin-bottom:16px;}
+.cv-form label{font-size:12px;color:#a0aec0;font-family:'Press Start 2P',monospace;display:block;margin-bottom:7px;}
+.cv-inputs{display:flex;gap:8px;margin-bottom:10px;}
+.cv-inputs input{flex:1;background:#1a1a2e;border:1px solid #e94560;color:#f0e68c;padding:10px 10px;border-radius:8px;font-size:14px;outline:none;min-width:0;}
+.cv-inputs input::placeholder{color:#4a5568;font-size:12px;}
+.cv-opt{display:flex;align-items:center;gap:12px;margin-bottom:14px;background:#0f3460;border-radius:12px;padding:12px;border:1px solid #e94560;}
+.cv-opt label{font-size:12px;color:#a0aec0;font-family:'Press Start 2P',monospace;cursor:pointer;flex:1;line-height:1.7;}
+#cvonly{width:18px;height:18px;accent-color:#e94560;cursor:pointer;}
+#cvlist{max-height:260px;overflow-y:auto;}
+.cvi{display:flex;align-items:center;gap:8px;padding:9px 11px;border:.5px solid #0f3460;border-radius:8px;margin-bottom:7px;background:#0f3460;}
+.cvi .cvbase{font-family:'Press Start 2P',monospace;font-size:12px;color:#f0e68c;min-width:80px;}
+.cvi .cvforms{font-size:13px;color:#a0aec0;flex:1;}
+.cvi .cvdel{background:transparent;border:1px solid #e94560;color:#fc8181;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;}
+.cvi .cvdel:hover{background:#e94560;color:#fff;}
+
+/* ── MUSIC TOGGLE / BACK BUTTON ── */
+#mtoggle{position:absolute;top:14px;right:14px;background:#0f3460;border:1px solid #e94560;color:#f0e68c;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'Press Start 2P',monospace;z-index:20;}
+#mtoggle:hover{background:#e94560;}
+#backBtn{position:absolute;top:14px;left:14px;background:#0f3460;border:1px solid #63b3ed;color:#63b3ed;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'Press Start 2P',monospace;z-index:20;display:none;}
+#backBtn:hover{background:#3182ce;color:#fff;}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
+@keyframes cdpop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="flash"></div>
+<button id="mtoggle" onclick="toggleMusic()">♪ ON</button>
+<button id="backBtn" onclick="backToStart()">← BACK</button>
+
+<!-- ── START SCREEN ── -->
+<div id="ss" class="screen active">
+  <p class="px" id="sstitle">VERB<br>BLASTER</p>
+  <div id="namerow">
+    <label for="pname">PLAYER:</label>
+    <input id="pname" type="text" placeholder="enter your name" maxlength="16" autocomplete="off"/>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card mc-classic" onclick="tryStart('classic')">
+      <div class="mc-icon">🏎️</div>
+      <div class="mc-title">CLASSIC<br>MODE</div>
+      <div class="mc-sub">V2 / V3 only</div>
+    </div>
+    <div class="mode-card mc-study" onclick="tryStart('study')">
+      <div class="mc-icon">📋</div>
+      <div class="mc-title">重點<br>溫習</div>
+      <div class="mc-sub">All 5 tenses<br>80 verbs</div>
+    </div>
+    <div class="mode-card mc-review" onclick="tryStart('review')" id="reviewCard">
+      <div class="mc-icon">🔁</div>
+      <div class="mc-title">錯題<br>回顧</div>
+      <div id="reviewBadge" class="mc-badge" style="display:none;"></div>
+      <div class="mc-sub" id="reviewSub">No wrong answers yet</div>
+    </div>
+  </div>
+  <div class="bb-row">
+    <button class="bb bb-blue bb-sm" onclick="showScreen('lb')">LEADERBOARD</button>
+    <button class="bb bb-green bb-sm" onclick="showScreen('cv')">CUSTOM VERBS</button>
+  </div>
+</div>
+
+<!-- ── COUNTDOWN ── -->
+<div id="cd" class="screen"><div id="cdtxt"></div></div>
+
+<!-- ── GAME SCREEN ── -->
+<div id="gscreen" class="screen">
+  <div id="hud">
+    <div class="hc"><div class="hl" id="hl0">COINS</div><div class="hv" id="sv">0</div></div>
+    <div class="hc"><div class="hl" id="hl1">LAP</div><div class="hv" id="lv">1</div></div>
+    <div class="hc"><div class="hl">LIVES</div><div class="hv" id="lf">♥♥♥</div></div>
+  </div>
+  <div id="trow">
+    <div class="ts" id="ts0"></div><div class="ts" id="ts1"></div>
+    <div class="ts" id="ts2"></div><div class="ts" id="ts3"></div>
+    <div class="ts" id="ts4"></div>
+    <div id="tlabel">→ BOSS!</div>
+  </div>
+  <div id="revprog"></div>
+  <div id="bsec">
+    <div id="bname"></div>
+    <div id="bhbar"><div id="bhf" style="width:100%"></div></div>
+  </div>
+  <div id="tibar"><div id="tifill" style="width:100%;background:#48bb78;"></div></div>
+  <div id="combo"></div>
+  <div id="vsign">
+    <div id="vdisp"></div>
+    <div id="vsub"></div>
+  </div>
+  <div id="qtype"></div>
+  <input id="ainput" type="text" placeholder="type here then press Enter" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+  <div id="fb"></div>
+</div>
+
+<!-- ── GAME OVER ── -->
+<div id="gs" class="screen">
+  <p class="px" id="gotitle">GAME<br>OVER</p>
+  <div id="fscore"></div>
+  <div id="frank"></div>
+  <div id="rev"></div>
+  <div class="bb-row">
+    <button class="bb bb-sm" id="playAgainBtn" onclick="tryStart('classic')">PLAY AGAIN</button>
+    <button class="bb bb-blue bb-sm" onclick="nextPlayer()">NEXT PLAYER</button>
+    <button class="bb bb-green bb-sm" onclick="showScreen('lb')">LEADERBOARD</button>
+  </div>
+</div>
+
+<!-- ── LEADERBOARD ── -->
+<div id="lb" class="screen">
+  <p class="px" id="lbtitle">LEADERBOARD</p>
+  <table id="lbtable">
+    <thead><tr><th>#</th><th>NAME</th><th>SCORE</th><th>MODE</th><th>LAP</th><th>DATE</th></tr></thead>
+    <tbody id="lbbody"></tbody>
+  </table>
+  <div id="lbempty" style="display:none;text-align:center;color:#4a5568;font-size:12px;padding:20px;">No scores yet!</div>
+  <div class="bb-row">
+    <button class="bb bb-out bb-sm" onclick="showScreen('ss')">BACK</button>
+    <button class="bb bb-out bb-sm" onclick="clearLB()" style="border-color:#4a5568;color:#4a5568;">CLEAR ALL</button>
+  </div>
+</div>
+
+<!-- ── CUSTOM VERBS ── -->
+<div id="cv" class="screen">
+  <p class="px" id="cvtitle">CUSTOM VERBS</p>
+  <div class="cv-opt">
+    <input type="checkbox" id="cvonly" onchange="saveOpt()">
+    <label for="cvonly">Custom verbs only<br>(skip default + Excel list)</label>
+  </div>
+  <div class="cv-form">
+    <label>ADD NEW VERB</label>
+    <div class="cv-inputs">
+      <input id="cv1" type="text" placeholder="Base V1" autocapitalize="none" spellcheck="false"/>
+      <input id="cv2" type="text" placeholder="Past V2" autocapitalize="none" spellcheck="false"/>
+      <input id="cv3" type="text" placeholder="Participle V3" autocapitalize="none" spellcheck="false"/>
+    </div>
+    <button class="bb bb-green bb-sm" onclick="addCustomVerb()">+ ADD</button>
+  </div>
+  <div id="cvlist"></div>
+  <div class="bb-row"><button class="bb bb-out bb-sm" onclick="showScreen('ss')">BACK</button></div>
+</div>
+
+</div>
+<script>
+// ── EXCEL VERB DATA (重點溫習) ────────────────────────────────────────────
+// Columns: num, zh (Chinese), v1 (base), v1s (he/she/it), ving (-ing), v2 (past), v3 (participle)
+const EXCEL_VERBS=[
+  {num:1,zh:'成為',v1:'become',v1s:'becomes',ving:'becoming',v2:'became',v3:'become'},
+  {num:2,zh:'打倒',v1:'beat',v1s:'beats',ving:'beating',v2:'beat',v3:'beaten'},
+  {num:3,zh:'忍受',v1:'bear',v1s:'bears',ving:'bearing',v2:'bore',v3:'borne/born'},
+  {num:4,zh:'帶',v1:'bring',v1s:'brings',ving:'bringing',v2:'brought',v3:'brought'},
+  {num:5,zh:'買',v1:'buy',v1s:'buys',ving:'buying',v2:'bought',v3:'bought'},
+  {num:6,zh:'炸裂',v1:'burst',v1s:'bursts',ving:'bursting',v2:'burst',v3:'burst'},
+  {num:7,zh:'廣播',v1:'broadcast',v1s:'broadcasts',ving:'broadcasting',v2:'broadcast',v3:'broadcast'},
+  {num:8,zh:'刷',v1:'brush',v1s:'brushes',ving:'brushing',v2:'brushed',v3:'brushed'},
+  {num:9,zh:'流血',v1:'bleed',v1s:'bleeds',ving:'bleeding',v2:'bled',v3:'bled'},
+  {num:10,zh:'關',v1:'close',v1s:'closes',ving:'closing',v2:'closed',v3:'closed'},
+  {num:11,zh:'來',v1:'come',v1s:'comes',ving:'coming',v2:'came',v3:'come'},
+  {num:12,zh:'比較',v1:'compare',v1s:'compares',ving:'comparing',v2:'compared',v3:'compared'},
+  {num:13,zh:'哭',v1:'cry',v1s:'cries',ving:'crying',v2:'cried',v3:'cried'},
+  {num:14,zh:'花費',v1:'cost',v1s:'costs',ving:'costing',v2:'cost',v3:'cost'},
+  {num:15,zh:'形容',v1:'describe',v1s:'describes',ving:'describing',v2:'described',v3:'described'},
+  {num:16,zh:'喝',v1:'drink',v1s:'drinks',ving:'drinking',v2:'drank',v3:'drunk'},
+  {num:17,zh:'駕駛',v1:'drive',v1s:'drives',ving:'driving',v2:'drove',v3:'driven'},
+  {num:18,zh:'處理',v1:'deal',v1s:'deals',ving:'dealing',v2:'dealt',v3:'dealt'},
+  {num:19,zh:'完成',v1:'finish',v1s:'finishes',ving:'finishing',v2:'finished',v3:'finished'},
+  {num:20,zh:'跌下',v1:'fall',v1s:'falls',ving:'falling',v2:'fell',v3:'fallen'},
+  {num:21,zh:'找尋',v1:'find',v1s:'finds',ving:'finding',v2:'found',v3:'found'},
+  {num:22,zh:'打架',v1:'fight',v1s:'fights',ving:'fighting',v2:'fought',v3:'fought'},
+  {num:23,zh:'逃跑',v1:'flee',v1s:'flees',ving:'fleeing',v2:'fled',v3:'fled'},
+  {num:24,zh:'飛',v1:'fly',v1s:'flies',ving:'flying',v2:'flew',v3:'flown'},
+  {num:25,zh:'預測',v1:'forecast',v1s:'forecasts',ving:'forecasting',v2:'forecast',v3:'forecast'},
+  {num:26,zh:'禁止',v1:'forbid',v1s:'forbids',ving:'forbidding',v2:'forbade',v3:'forbidden'},
+  {num:27,zh:'原諒',v1:'forgive',v1s:'forgives',ving:'forgiving',v2:'forgave',v3:'forgiven'},
+  {num:28,zh:'凍結',v1:'freeze',v1s:'freezes',ving:'freezing',v2:'froze',v3:'frozen'},
+  {num:29,zh:'炒',v1:'fry',v1s:'fries',ving:'frying',v2:'fried',v3:'fried'},
+  {num:30,zh:'得到',v1:'get',v1s:'gets',ving:'getting',v2:'got',v3:'got'},
+  {num:31,zh:'給',v1:'give',v1s:'gives',ving:'giving',v2:'gave',v3:'given'},
+  {num:32,zh:'抓住',v1:'grab',v1s:'grabs',ving:'grabbing',v2:'grabbed',v3:'grabbed'},
+  {num:33,zh:'懸掛',v1:'hang',v1s:'hangs',ving:'hanging',v2:'hung',v3:'hung'},
+  {num:34,zh:'打/擊',v1:'hit',v1s:'hits',ving:'hitting',v2:'hit',v3:'hit'},
+  {num:35,zh:'蹦跳',v1:'hop',v1s:'hops',ving:'hopping',v2:'hopped',v3:'hopped'},
+  {num:36,zh:'拿著/舉行',v1:'hold',v1s:'holds',ving:'holding',v2:'held',v3:'held'},
+  {num:37,zh:'傷害',v1:'hurt',v1s:'hurts',ving:'hurting',v2:'hurt',v3:'hurt'},
+  {num:38,zh:'保存',v1:'keep',v1s:'keeps',ving:'keeping',v2:'kept',v3:'kept'},
+  {num:39,zh:'帶領',v1:'lead',v1s:'leads',ving:'leading',v2:'led',v3:'led'},
+  {num:40,zh:'讓',v1:'let',v1s:'lets',ving:'letting',v2:'let',v3:'let'},
+  {num:41,zh:'說謊',v1:'lie',v1s:'lies',ving:'lying',v2:'lied',v3:'lied'},
+  {num:42,zh:'平躺',v1:'lie',v1s:'lies',ving:'lying',v2:'lay',v3:'lain'},
+  {num:43,zh:'借出',v1:'lend',v1s:'lends',ving:'lending',v2:'lent',v3:'lent'},
+  {num:44,zh:'點燃',v1:'light',v1s:'lights',ving:'lighting',v2:'lighted/lit',v3:'lighted/lit'},
+  {num:45,zh:'誤認',v1:'mistake',v1s:'mistakes',ving:'mistaking',v2:'mistook',v3:'mistaken'},
+  {num:46,zh:'命令/落單',v1:'order',v1s:'orders',ving:'ordering',v2:'ordered',v3:'ordered'},
+  {num:47,zh:'克服',v1:'overcome',v1s:'overcomes',ving:'overcoming',v2:'overcame',v3:'overcome'},
+  {num:48,zh:'油顏色',v1:'paint',v1s:'paints',ving:'painting',v2:'painted',v3:'painted'},
+  {num:49,zh:'放',v1:'put',v1s:'puts',ving:'putting',v2:'put',v3:'put'},
+  {num:50,zh:'看書/閱讀',v1:'read',v1s:'reads',ving:'reading',v2:'read',v3:'read'},
+  {num:51,zh:'排練',v1:'rehearse',v1s:'rehearses',ving:'rehearsing',v2:'rehearsed',v3:'rehearsed'},
+  {num:52,zh:'休息',v1:'rest',v1s:'rests',ving:'resting',v2:'rested',v3:'rested'},
+  {num:53,zh:'響',v1:'ring',v1s:'rings',ving:'ringing',v2:'rang',v3:'rung'},
+  {num:54,zh:'跑',v1:'run',v1s:'runs',ving:'running',v2:'ran',v3:'run'},
+  {num:55,zh:'賣',v1:'sell',v1s:'sells',ving:'selling',v2:'sold',v3:'sold'},
+  {num:56,zh:'找',v1:'seek',v1s:'seeks',ving:'seeking',v2:'sought',v3:'sought'},
+  {num:57,zh:'照耀/發光',v1:'shine',v1s:'shines',ving:'shining',v2:'shone',v3:'shone'},
+  {num:58,zh:'縮小',v1:'shrink',v1s:'shrinks',ving:'shrinking',v2:'shrank',v3:'shrunk'},
+  {num:59,zh:'出示/展示',v1:'show',v1s:'shows',ving:'showing',v2:'showed',v3:'shown'},
+  {num:60,zh:'站立',v1:'stand',v1s:'stands',ving:'standing',v2:'stood',v3:'stood'},
+  {num:61,zh:'撞擊/罷工',v1:'strike',v1s:'strikes',ving:'striking',v2:'struck',v3:'struck'},
+  {num:62,zh:'發誓/詛咒',v1:'swear',v1s:'swears',ving:'swearing',v2:'swore',v3:'sworn'},
+  {num:63,zh:'搖晃',v1:'swing',v1s:'swings',ving:'swinging',v2:'swung',v3:'swung'},
+  {num:64,zh:'下雪',v1:'snow',v1s:'snows',ving:'snowing',v2:'snowed',v3:'snowed'},
+  {num:65,zh:'偷',v1:'steal',v1s:'steals',ving:'stealing',v2:'stole',v3:'stolen'},
+  {num:66,zh:'拼寫',v1:'spell',v1s:'spells',ving:'spelling',v2:'spelt/spelled',v3:'spelt/spelled'},
+  {num:67,zh:'花費/用',v1:'spend',v1s:'spends',ving:'spending',v2:'spent',v3:'spent'},
+  {num:68,zh:'撕',v1:'tear',v1s:'tears',ving:'tearing',v2:'tore',v3:'torn'},
+  {num:69,zh:'扔/丟',v1:'throw',v1s:'throws',ving:'throwing',v2:'threw',v3:'thrown'},
+  {num:70,zh:'教',v1:'teach',v1s:'teaches',ving:'teaching',v2:'taught',v3:'taught'},
+  {num:71,zh:'旅遊',v1:'travel',v1s:'travels',ving:'travelling',v2:'travelled',v3:'travelled'},
+  {num:72,zh:'起床/喚醒',v1:'wake',v1s:'wakes',ving:'waking',v2:'woke',v3:'woken'},
+  {num:73,zh:'穿',v1:'wear',v1s:'wears',ving:'wearing',v2:'wore',v3:'worn'},
+  {num:74,zh:'編織',v1:'weave',v1s:'weaves',ving:'weaving',v2:'wove',v3:'woven'},
+  {num:75,zh:'將/會',v1:'will',v1s:'-',ving:'-',v2:'would',v3:'-'},
+  {num:76,zh:'洗',v1:'wash',v1s:'washes',ving:'washing',v2:'washed',v3:'washed'},
+  {num:77,zh:'觀看',v1:'watch',v1s:'watches',ving:'watching',v2:'watched',v3:'watched'},
+  {num:78,zh:'工作',v1:'work',v1s:'works',ving:'working',v2:'worked',v3:'worked'},
+  {num:79,zh:'包裹',v1:'wrap',v1s:'wraps',ving:'wrapping',v2:'wrapped',v3:'wrapped'},
+  {num:80,zh:'叫喊',v1:'yell',v1s:'yells',ving:'yelling',v2:'yelled',v3:'yelled'},
+];
+
+// ── CLASSIC VERB LIST ─────────────────────────────────────────────────────
+const DEFAULT_VERBS=[
+  ['go','went','gone'],['eat','ate','eaten'],['run','ran','run'],['see','saw','seen'],
+  ['write','wrote','written'],['take','took','taken'],['give','gave','given'],
+  ['come','came','come'],['know','knew','known'],['think','thought','thought'],
+  ['buy','bought','bought'],['bring','brought','brought'],['sing','sang','sung'],
+  ['swim','swam','swum'],['drive','drove','driven'],['fly','flew','flown'],
+  ['grow','grew','grown'],['speak','spoke','spoken'],['break','broke','broken'],
+  ['choose','chose','chosen'],['begin','began','begun'],['bite','bit','bitten'],
+  ['blow','blew','blown'],['catch','caught','caught'],['draw','drew','drawn'],
+  ['fall','fell','fallen'],['find','found','found'],['freeze','froze','frozen'],
+  ['hide','hid','hidden'],['hold','held','held'],['keep','kept','kept'],
+  ['leave','left','left'],['lose','lost','lost'],['make','made','made'],
+  ['meet','met','met'],['pay','paid','paid'],['ride','rode','ridden'],
+  ['ring','rang','rung'],['rise','rose','risen'],['shake','shook','shaken'],
+  ['shoot','shot','shot'],['sit','sat','sat'],['sleep','slept','slept'],
+  ['steal','stole','stolen'],['teach','taught','taught'],['tear','tore','torn'],
+  ['throw','threw','thrown'],['wear','wore','worn'],['win','won','won'],
+  ['fight','fought','fought'],['wake','woke','woken'],['spend','spent','spent'],
+  ['sell','sold','sold'],['send','sent','sent'],['say','said','said'],
+  ['show','showed','shown'],['understand','understood','understood'],
+  ['feel','felt','felt'],['build','built','built'],['hear','heard','heard'],
+  ['tell','told','told'],['stand','stood','stood'],['read','read','read'],
+  ['cut','cut','cut'],['put','put','put'],['hit','hit','hit'],['hurt','hurt','hurt'],
+  ['let','let','let'],['set','set','set'],['forget','forgot','forgotten'],
+  ['forgive','forgave','forgiven'],['forbid','forbade','forbidden'],
+  ['mean','meant','meant'],['lead','led','led'],['feed','fed','fed'],
+  ['sweep','swept','swept'],['bleed','bled','bled']
+];
+
+const BOSSES=[
+  {name:'GHOST RACER',  hp:4, pool:['go','eat','run','see','write','take']},
+  {name:'KOOPA KING',   hp:5, pool:['know','think','buy','bring','sing','swim','fly']},
+  {name:'BOWSER JR.',   hp:7, pool:['grow','speak','break','choose','begin','blow','catch']},
+  {name:'KING BOO',     hp:9, pool:['fall','find','freeze','shake','steal','fight','throw','wake']},
+  {name:'BOWSER',       hp:12,pool:['understand','forget','forbid','wear','win','teach','tear','ride','ring']}
+];
+const STUDY_BOSSES=[
+  {name:'TENSE TRAINER',hp:5, pool:['drink','drive','deal','fall','find','fight','flee','fly']},
+  {name:'CONJ. KING',   hp:7, pool:['freeze','forbid','forgive','hang','hold','keep','lead','mistake']},
+  {name:'IRREGULAR ACE',hp:9, pool:['overcome','ring','shrink','strike','swear','swing','steal','seek']},
+  {name:'BOWSER SENSEI',hp:12,pool:['tear','throw','wake','weave','wear','teach','shine','spell']}
+];
+
+// ── STORAGE HELPERS ───────────────────────────────────────────────────────
+function getLB(){return JSON.parse(localStorage.getItem('vb_lb')||'[]');}
+function saveLB(a){localStorage.setItem('vb_lb',JSON.stringify(a));}
+function getCustom(){return JSON.parse(localStorage.getItem('vb_custom')||'[]');}
+function saveCustom(a){localStorage.setItem('vb_custom',JSON.stringify(a));}
+function getCustomOnly(){return localStorage.getItem('vb_customOnly')==='true';}
+function saveOpt(){localStorage.setItem('vb_customOnly',document.getElementById('cvonly').checked);}
+
+// Persistent wrong answers (錯題回顧)
+function getPersistentWrongs(){return JSON.parse(localStorage.getItem('vb_review')||'[]');}
+function addPersistentWrong(prompt,qt,correct,zh){
+  let list=getPersistentWrongs();
+  let idx=list.findIndex(r=>r.prompt===prompt&&r.qt===qt);
+  if(idx>=0){list[idx].count=Math.min(list[idx].count+1,5);}
+  else{list.push({prompt,qt,correct,zh:zh||'',count:2});}
+  localStorage.setItem('vb_review',JSON.stringify(list));
+}
+function reducePersistentWrong(prompt,qt){
+  let list=getPersistentWrongs();
+  let idx=list.findIndex(r=>r.prompt===prompt&&r.qt===qt);
+  if(idx>=0){list[idx].count--;if(list[idx].count<=0)list.splice(idx,1);}
+  localStorage.setItem('vb_review',JSON.stringify(list));
+}
+
+function getActiveVerbs(){
+  let custom=getCustom();
+  if(getCustomOnly()&&custom.length>0)return custom;
+  return [...DEFAULT_VERBS,...custom];
+}
+
+// ── AUDIO ─────────────────────────────────────────────────────────────────
+let AC=null,musicOn=true,mTimer=null,mPos=0,mSched=0,mTrk='n';
+const BPM=156,B=60/BPM;
+const ff={C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,Ab3:207.65,A3:220,Bb3:233.08,
+  C4:261.63,D4:293.66,Eb4:311.13,E4:329.63,F4:349.23,G4:392,Ab4:415.3,A4:440,Bb4:466.16,B4:493.88,
+  C5:523.25,D5:587.33,E5:659.25,G5:783.99,_:0};
+const TN=[[ff.E4,.25],[ff.G4,.25],[ff.A4,.5],[ff.G4,.25],[ff.E4,.25],[ff.D4,.5],
+  [ff.E4,.25],[ff.G4,.25],[ff.C5,.5],[ff.B4,.25],[ff.A4,.25],[ff.G4,.5],
+  [ff.A4,.25],[ff.C5,.25],[ff.D5,.5],[ff.C5,.25],[ff.A4,.25],[ff.G4,.5],
+  [ff.F4,.25],[ff.G4,.25],[ff.A4,.5],[ff.G4,.25],[ff.F4,.25],[ff.E4,.5],
+  [ff.C4,.25],[ff.E4,.25],[ff.G4,.5],[ff.A4,.25],[ff.G4,.25],[ff.F4,.25],[ff.E4,.25],
+  [ff.D4,.5],[ff.F4,.5],[ff.A4,.25],[ff.G4,.25],[ff.F4,.25],[ff.E4,.25],
+  [ff.G4,.5],[ff.B4,.5],[ff.D5,.25],[ff.C5,.25],[ff.B4,.25],[ff.A4,.25],
+  [ff.G4,.5],[ff.E4,.5],[ff.C4,1]];
+const TB=[[ff.G3,.25],[ff.G3,.25],[ff.Ab3,.5],[ff.G3,.25],[ff.F3,.25],[ff.Eb4,.5],
+  [ff.D3,.25],[ff.F3,.25],[ff.Ab3,.5],[ff.Bb3,.5],[ff.Ab3,.5],
+  [ff.G3,.25],[ff.Bb3,.25],[ff.C4,.5],[ff.Bb3,.25],[ff.Ab3,.25],[ff.G3,.5],
+  [ff.F3,.25],[ff.Ab3,.25],[ff.C4,.5],[ff.Eb4,.5],[ff.D4,.5],
+  [ff.Eb4,.25],[ff.Eb4,.25],[ff.D4,.5],[ff.C4,.25],[ff.Bb3,.25],[ff.Ab3,.5],
+  [ff.G3,.5],[ff.Bb3,.5],[ff.D4,.25],[ff.C4,.25],[ff.Bb3,.25],[ff.Ab3,.25],
+  [ff.G3,.5],[ff.F3,.5],[ff.Eb3,.5],[ff.D3,.5],[ff.G3,1.5],[ff._,.5]];
+
+function nt(freq,t,dur,vol=0.08,type='square'){
+  if(!AC||!freq)return;
+  let o=AC.createOscillator(),g=AC.createGain();
+  o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(vol,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur*.82);
+  o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+dur);
+}
+function sched(){
+  if(!musicOn||!AC)return;
+  let tk=mTrk==='b'?TB:TN;
+  while(mSched<AC.currentTime+.5){let n=tk[mPos%tk.length];nt(n[0],mSched,n[1]*B);mSched+=n[1]*B;mPos++;}
+  mTimer=setTimeout(sched,90);
+}
+function startMusic(t){if(!AC||!musicOn)return;mTrk=t;mPos=0;mSched=AC.currentTime+.1;clearTimeout(mTimer);sched();}
+function stopMusic(){clearTimeout(mTimer);}
+function swMusic(t){if(mTrk!==t){mTrk=t;mPos=0;mSched=AC?AC.currentTime+.05:0;}}
+function toggleMusic(){musicOn=!musicOn;document.getElementById('mtoggle').textContent='♪ '+(musicOn?'ON':'OFF');if(musicOn&&AC)startMusic(mTrk);else stopMusic();}
+function sfxCoin(){if(!AC)return;let t=AC.currentTime;nt(988,t,.06,.18,'sine');nt(1319,t+.06,.1,.14,'sine');}
+function sfxWrong(){if(!AC)return;let t=AC.currentTime;nt(220,t,.1,.18,'sawtooth');nt(185,t+.1,.12,.14,'sawtooth');nt(156,t+.22,.2,.1,'sawtooth');}
+function sfxBoss(){if(!AC)return;let t=AC.currentTime;[392,494,587,784].forEach((f,i)=>nt(f,t+i*.09,.15,.12,'square'));}
+function sfxClear(){if(!AC)return;let t=AC.currentTime;[262,330,392,494,659,784,1047].forEach((f,i)=>nt(f,t+i*.07,.1,.1,'triangle'));}
+function sfxOver(){if(!AC)return;let t=AC.currentTime;[440,392,349,294,262,220].forEach((f,i)=>nt(f,t+i*.2,.28,.1,'triangle'));}
+function sfxTick(){if(!AC)return;nt(880,AC.currentTime,.07,.12,'sine');}
+function sfxGo(){if(!AC)return;let t=AC.currentTime;nt(784,t,.07,.14,'sine');nt(1047,t+.08,.22,.18,'sine');}
+function sfxMastered(){if(!AC)return;let t=AC.currentTime;[523,659,784,1047,1319].forEach((f,i)=>nt(f,t+i*.06,.08,.1,'sine'));}
+
+// ── SCREEN ROUTER ─────────────────────────────────────────────────────────
+let currentPlayer='',currentMode='classic';
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='lb')renderLB();
+  if(id==='cv')renderCV();
+  if(id==='ss')updateReviewBadge();
+  document.getElementById('backBtn').style.display=(id==='gscreen')?'block':'none';
+}
+
+function backToStart(){
+  clearTimer();stopMusic();
+  document.getElementById('ainput').onkeydown=null;
+  showScreen('ss');
+}
+
+function updateReviewBadge(){
+  let list=getPersistentWrongs();
+  let badge=document.getElementById('reviewBadge');
+  let sub=document.getElementById('reviewSub');
+  if(list.length>0){
+    badge.style.display='inline-block';
+    badge.textContent=list.length+' pending';
+    sub.textContent='Tap to revise';
+  } else {
+    badge.style.display='none';
+    sub.textContent='No wrong answers yet';
+  }
+}
+
+function tryStart(mode){
+  let name=document.getElementById('pname').value.trim();
+  if(!name){document.getElementById('pname').focus();document.getElementById('pname').style.borderColor='#fc8181';return;}
+  document.getElementById('pname').style.borderColor='#e94560';
+  currentPlayer=name;currentMode=mode;
+  if(mode==='review'){
+    let list=getPersistentWrongs();
+    if(!list.length){alert('No wrong answers saved yet!\nPlay Classic or 重點溫習 first.');return;}
+  }
+  if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();}
+  countdown(mode);
+}
+
+function nextPlayer(){document.getElementById('pname').value='';currentPlayer='';showScreen('ss');}
+
+// ── COUNTDOWN ─────────────────────────────────────────────────────────────
+function countdown(mode){
+  showScreen('cd');
+  let tx=document.getElementById('cdtxt');
+  let steps=[['3','#fc8181'],['2','#f6e05e'],['1','#68d391'],['GO!','#63b3ed']];
+  let i=0;
+  function tick(){
+    tx.style.animation='none';tx.offsetHeight;
+    tx.style.animation='cdpop .55s forwards';
+    tx.textContent=steps[i][0];tx.style.color=steps[i][1];
+    i<3?sfxTick():sfxGo();i++;
+    if(i<steps.length)setTimeout(tick,680);
+    else setTimeout(()=>startGame(mode),700);
+  }
+  tick();
+}
+
+// ── GAME ENGINE ────────────────────────────────────────────────────────────
+let S={};
+const $=id=>document.getElementById(id);
+
+function startGame(mode){
+  S={score:0,lives:3,level:1,combo:0,correct:0,phase:'n',
+    bIdx:0,bHp:0,bMax:0,bQ:[],cv:null,tid:null,ans:false,lap:0,wrong:[],
+    mode:mode,
+    reviewPool: mode==='review'?[...getPersistentWrongs()].sort(()=>Math.random()-.5):[],
+    masteredCount:0
+  };
+
+  // Configure HUD for mode
+  $('hl0').textContent=mode==='review'?'REMAINING':'COINS';
+  $('hl1').textContent=mode==='review'?'MASTERED':'LAP';
+  $('trow').style.display=mode==='review'?'none':'flex';
+  $('revprog').style.display=mode==='review'?'block':'none';
+
+  // Sign colour
+  $('vsign').className=mode==='study'?'study-mode':mode==='review'?'review-mode':'';
+
+  // Play again button mode
+  $('playAgainBtn').onclick=()=>tryStart(mode);
+
+  showScreen('gscreen');
+  $('ainput').onkeydown=e=>{if(e.key==='Enter'&&S.ans)submit();};
+  updStats();updTrack();
+  startMusic('n');
+  nextQ();
+}
+
+function tLimit(){
+  if(S.mode==='review')return 15000;
+  return Math.max(2500,7200-(S.level-1)*420);
+}
+
+function nextQ(){
+  clearTimer();$('fb').textContent='';$('fb').style.color='';$('vsub').textContent='';S.ans=false;
+
+  if(S.mode==='review'){
+    nextReviewQ();return;
+  }
+  if(S.mode==='study'){
+    nextStudyQ();return;
+  }
+  // Classic mode
+  if(S.lap>=5&&S.bIdx<BOSSES.length){bossFight(BOSSES);return;}
+  let pool=getActiveVerbs();
+  let v=pool[Math.floor(Math.random()*pool.length)];
+  let qt=Math.random()<.5?'v2':'v3';
+  S.cv={prompt:v[0],correct:qt==='v2'?v[1]:v[2],qt,zh:''};
+  $('bsec').style.display='none';
+  setVerb(v[0],'');
+  $('qtype').textContent=qt==='v2'?'V2 — past simple':'V3 — past participle (have ___)';
+  $('combo').textContent=S.combo>=2?'COMBO x'+S.combo+'!':'';
+  $('ainput').value='';$('ainput').focus();S.ans=true;startTimer();
+}
+
+function nextStudyQ(){
+  if(S.lap>=5&&S.bIdx<STUDY_BOSSES.length){bossFight(STUDY_BOSSES);return;}
+  let ev=EXCEL_VERBS[Math.floor(Math.random()*EXCEL_VERBS.length)];
+  let q=buildStudyQ(ev);
+  if(!q){nextQ();return;}
+  S.cv={prompt:q.prompt,correct:q.correct,qt:q.type,zh:ev.zh};
+  $('bsec').style.display='none';
+  setVerb(q.display,q.type==='zh'?'→ 打 V1 (base form)':ev.zh);
+  $('qtype').textContent=q.label;
+  $('combo').textContent=S.combo>=2?'COMBO x'+S.combo+'!':'';
+  $('ainput').value='';$('ainput').focus();S.ans=true;startTimer();
+}
+
+function buildStudyQ(ev){
+  // 重點溫習：只考 Present Perfect Tense (V3)
+  if(ev.v3==='-')return null;
+  return {type:'v3',prompt:ev.v1,display:ev.v1,correct:ev.v3,label:'Present Perfect Tense (V3) — have / has ___'};
+}
+
+function nextReviewQ(){
+  if(!S.reviewPool.length){
+    // Refresh from storage (might have changed from correct answers)
+    let fresh=getPersistentWrongs();
+    if(!fresh.length){reviewComplete();return;}
+    S.reviewPool=[...fresh].sort(()=>Math.random()-.5);
+  }
+  let item=S.reviewPool.shift();
+  S.cv={prompt:item.prompt,correct:item.correct,qt:item.qt,zh:item.zh||''};
+  let remaining=getPersistentWrongs().length;
+  $('revprog').textContent='REMAINING: '+remaining+' / MASTERED: '+S.masteredCount;
+  let qtLabel={zh:'中文 → V1',v1s:'Simple Present (he/she/it)',ving:'Present Continuous (-ing)',v2:'Past Tense (V2)',v3:'Present Perfect (V3)'}[item.qt]||item.qt;
+  setVerb(item.prompt,item.qt!=='zh'&&item.zh?item.zh:'');
+  $('qtype').textContent=qtLabel;
+  $('combo').textContent=S.combo>=2?'COMBO x'+S.combo+'!':'';
+  $('ainput').value='';$('ainput').focus();S.ans=true;startTimer();
+}
+
+function reviewComplete(){
+  clearTimer();stopMusic();sfxMastered();
+  $('gscreen').style.display='none';
+  showScreen('gs');
+  $('gotitle').textContent='ALL DONE!';
+  $('fscore').innerHTML='<span style="color:#b794f4;font-family:\'Press Start 2P\',monospace;font-size:11px;">錯題全部掌握!</span><br>Mastered: <strong>'+S.masteredCount+'</strong> verbs';
+  $('frank').textContent='';
+  $('rev').innerHTML='<p style="text-align:center;font-size:11px;color:#68d391;margin:14px 0;font-family:\'Press Start 2P\',monospace;">PERFECT REVIEW!</p>';
+  $('ainput').onkeydown=null;
+}
+
+function setVerb(w,sub){
+  let n=w.length,sz=n<=2?52:n<=3?48:n<=5?38:n<=7?30:n<=9?24:n<=12?20:16;
+  // For Chinese characters, different sizing
+  if(/[一-鿿]/.test(w)){sz=w.length<=3?36:w.length<=5?28:22;}
+  $('vdisp').style.fontSize=sz+'px';
+  $('vdisp').textContent=w;
+  $('vsub').textContent=sub||'';
+}
+
+function bossFight(bossArr){
+  swMusic('b');sfxBoss();
+  let b=bossArr[S.bIdx];S.bIdx++;S.phase='b';
+  S.bHp=b.hp;S.bMax=b.hp;S.bQ=[...b.pool].sort(()=>Math.random()-.5);
+  $('bsec').style.display='block';$('bname').textContent='BOSS: '+b.name;updBoss();
+  $('fb').textContent='BOSS INCOMING! Defeat '+b.name+'!';$('fb').style.color='#fc8181';
+  $('ainput').value='';S.ans=false;
+  setTimeout(()=>{$('fb').textContent='';$('fb').style.color='';nextQ();},1600);
+}
+
+function bossEnd(){
+  swMusic('n');sfxClear();
+  S.phase='n';S.level++;S.score+=5;S.lap=0;
+  $('bsec').style.display='none';
+  $('fb').textContent='COURSE CLEAR! +5! Lap '+S.level+'!';$('fb').style.color='#68d391';
+  $('vdisp').textContent='';$('vsub').textContent='';$('qtype').textContent='';S.ans=false;
+  updStats();updTrack();
+  setTimeout(()=>{$('fb').textContent='';$('fb').style.color='';nextQ();},2000);
+}
+
+function updBoss(){
+  let p=S.bHp/S.bMax*100;
+  $('bhf').style.width=p+'%';
+  $('bhf').style.background=p>55?'#e94560':p>30?'#ed8936':'#48bb78';
+}
+function updTrack(){
+  if(S.mode==='review')return;
+  for(let i=0;i<5;i++){
+    let el=$('ts'+i);el.className='ts';
+    if(S.lap>i)el.classList.add('done');
+    else if(S.lap===i&&S.phase==='n')el.classList.add('cur');
+  }
+}
+
+function startTimer(){
+  let lim=tLimit(),t0=Date.now();
+  S.tid=setInterval(()=>{
+    let r=Math.max(0,1-(Date.now()-t0)/lim);
+    $('tifill').style.width=(r*100)+'%';
+    $('tifill').style.background=r>.55?'#48bb78':r>.25?'#ed8936':'#e94560';
+    if(r<=0){clearTimer();if(S.ans){S.ans=false;timeout();}}
+  },60);
+}
+function clearTimer(){if(S.tid){clearInterval(S.tid);S.tid=null;}}
+
+function timeout(){
+  let ans=S.cv.correct;
+  sfxWrong();doFlash('#e94560');
+  addPersistentWrong(S.cv.prompt,S.cv.qt,ans,S.cv.zh);
+  S.wrong.push({base:S.cv.prompt,qt:S.cv.qt,user:'(time out)',correct:ans,zh:S.cv.zh});
+  $('fb').textContent="Time's up! → "+ans;$('fb').style.color='#fc8181';
+  S.combo=0;loseLife();
+}
+
+function submit(){
+  let inp=$('ainput').value.trim().toLowerCase();if(!inp)return;
+  S.ans=false;
+  let correct=S.cv.correct;
+  let ok=correct.split('/').map(x=>x.trim());
+  if(ok.includes(inp))onRight();else onWrong(inp,correct);
+}
+
+function onRight(){
+  clearTimer();S.combo++;S.correct++;
+  let pts=Math.min(S.combo,6);S.score+=pts;sfxCoin();
+
+  if(S.mode==='review'){
+    reducePersistentWrong(S.cv.prompt,S.cv.qt);
+    S.masteredCount++;
+    $('fb').textContent=S.combo>=3?'MASTERED! Combo x'+S.combo+'!':'Correct! Keep going!';
+    $('fb').style.color='#b794f4';
+    updStats();setTimeout(()=>nextQ(),650);return;
+  }
+
+  if(S.phase==='b'){
+    let bossArr=S.mode==='study'?STUDY_BOSSES:BOSSES;
+    S.bHp--;
+    let bname=bossArr[S.bIdx-1]?.name||'Boss';
+    $('fb').textContent=S.combo>=3?'HIT! Combo x'+S.combo+'! ('+S.bHp+' HP)':'Direct hit! ('+S.bHp+' HP)';
+    $('fb').style.color='#68d391';
+    if(S.bHp<=0){updStats();updBoss();setTimeout(()=>bossEnd(),650);return;}
+  } else {
+    S.lap=Math.min(S.lap+1,5);
+    $('fb').textContent=S.combo>=3?'CORRECT! Combo x'+S.combo+'! +'+pts:'Correct! +'+pts;
+    $('fb').style.color='#68d391';
+  }
+  $('vsign').style.animation='none';$('vsign').offsetHeight;$('vsign').style.animation='pop .25s';
+  updStats();updBoss();updTrack();setTimeout(()=>nextQ(),640);
+}
+
+function onWrong(user,correct){
+  clearTimer();S.combo=0;sfxWrong();doFlash('#e94560');
+  addPersistentWrong(S.cv.prompt,S.cv.qt,correct,S.cv.zh);
+  S.wrong.push({base:S.cv.prompt,qt:S.cv.qt,user,correct,zh:S.cv.zh});
+  $('fb').textContent='Wrong! → '+correct;$('fb').style.color='#fc8181';
+  let ai=$('ainput');ai.style.animation='none';ai.offsetHeight;ai.style.animation='shake .4s';
+  loseLife();
+}
+
+function loseLife(){
+  S.lives--;updStats();
+  if(S.lives<=0)setTimeout(gameOver,1100);
+  else setTimeout(()=>nextQ(),1300);
+}
+
+function updStats(){
+  if(S.mode==='review'){
+    let rem=getPersistentWrongs().length;
+    $('sv').textContent=rem;
+    $('lv').textContent=S.masteredCount;
+  } else {
+    $('sv').textContent=S.score;
+    $('lv').textContent=S.level;
+  }
+  $('lf').textContent='♥'.repeat(Math.max(0,S.lives))+'♡'.repeat(Math.max(0,3-S.lives));
+}
+
+function doFlash(col){
+  let fl=$('flash');fl.style.background=col;fl.style.opacity='.25';
+  setTimeout(()=>fl.style.opacity='0',200);
+}
+
+function gameOver(){
+  clearTimer();stopMusic();sfxOver();
+  $('ainput').onkeydown=null;
+
+  // Save score
+  let lb=getLB();
+  let modeLabel=S.mode==='classic'?'Classic':S.mode==='study'?'重點溫習':'錯題回顧';
+  let entry={name:currentPlayer,score:S.score,level:S.level,mode:modeLabel,date:new Date().toLocaleDateString('zh-HK')};
+  lb.push(entry);lb.sort((a,b)=>b.score-a.score);lb=lb.slice(0,30);saveLB(lb);
+  let rank=lb.findIndex(e=>e.name===entry.name&&e.score===entry.score&&e.date===entry.date)+1;
+
+  let msg=S.score<5?'Keep training!':S.score<15?'Not bad!':S.score<30?'Good race!':S.score<50?'Expert racer!':'GRAND CHAMPION!';
+  $('gotitle').textContent='GAME\nOVER';
+  $('fscore').innerHTML=currentPlayer+' — Score: <strong>'+S.score+'</strong> · Lap: <strong>'+S.level+'</strong><br><span style="color:#f0e68c;font-family:\'Press Start 2P\',monospace;font-size:10px;">'+msg+'</span>';
+  $('frank').textContent=rank?'YOUR RANK: #'+rank+' ('+lb.length+' players)':'';
+
+  let rv=$('rev');
+  if(!S.wrong.length){
+    rv.innerHTML='<p style="text-align:center;font-size:10px;color:#68d391;margin:12px 0;font-family:\'Press Start 2P\',monospace;">PERFECT RUN!</p>';
+  } else {
+    let qtNames={zh:'中文→V1',v1s:'V1s (he/she/it)',ving:'-ing',v2:'Past (V2)',v3:'Participle (V3)'};
+    let h='<h4>WRONG ANSWERS ('+S.wrong.length+') — saved for 錯題回顧</h4>';
+    S.wrong.forEach(w=>{
+      let lbl=qtNames[w.qt]||w.qt;
+      let hint=w.zh&&w.zh!==w.base?' ('+w.zh+')':'';
+      h+=`<div class="rc"><span class="rv">${w.base}${hint}</span><span class="rt">${lbl}</span><span class="rar">→</span><span class="rw">${w.user}</span><span class="rar">→</span><span class="rr">${w.correct}</span></div>`;
+    });
+    rv.innerHTML=h;
+  }
+  showScreen('gs');
+}
+
+// ── LEADERBOARD ────────────────────────────────────────────────────────────
+function renderLB(){
+  let lb=getLB();
+  let tbody=$('lbbody');let empty=$('lbempty');
+  if(!lb.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  let medals=['🥇','🥈','🥉'];
+  tbody.innerHTML=lb.map((e,i)=>{
+    let cls=i===0?'rank1':i===1?'rank2':i===2?'rank3':e.name===currentPlayer?'me':'';
+    let medal=i<3?'<span class="medal">'+medals[i]+'</span>':'#'+(i+1);
+    return`<tr class="${cls}"><td>${medal}</td><td>${e.name}</td><td>${e.score}</td><td style="font-size:9px;">${e.mode}</td><td>${e.level}</td><td style="font-size:9px;">${e.date}</td></tr>`;
+  }).join('');
+}
+function clearLB(){if(confirm('Clear all scores?')){saveLB([]);renderLB();}}
+
+// ── CUSTOM VERBS ────────────────────────────────────────────────────────────
+function renderCV(){
+  document.getElementById('cvonly').checked=getCustomOnly();
+  let custom=getCustom();let list=$('cvlist');
+  if(!custom.length){list.innerHTML='<div style="text-align:center;color:#4a5568;font-size:12px;padding:14px;">No custom verbs yet.</div>';return;}
+  list.innerHTML=custom.map((v,i)=>`
+    <div class="cvi"><span class="cvbase">${v[0]}</span>
+    <span class="cvforms">V2: <strong style="color:#f0e68c">${v[1]}</strong> · V3: <strong style="color:#f0e68c">${v[2]}</strong></span>
+    <button class="cvdel" onclick="deleteCV(${i})">DEL</button></div>`).join('');
+}
+function addCustomVerb(){
+  let v1=$('cv1').value.trim().toLowerCase();
+  let v2=$('cv2').value.trim().toLowerCase();
+  let v3=$('cv3').value.trim().toLowerCase();
+  if(!v1||!v2||!v3){[$('cv1'),$('cv2'),$('cv3')].forEach(el=>{if(!el.value.trim())el.style.borderColor='#fc8181';});return;}
+  [$('cv1'),$('cv2'),$('cv3')].forEach(el=>el.style.borderColor='#e94560');
+  let custom=getCustom();
+  if(custom.find(x=>x[0]===v1)){alert(v1+' already exists!');return;}
+  custom.push([v1,v2,v3]);saveCustom(custom);
+  $('cv1').value='';$('cv2').value='';$('cv3').value='';$('cv1').focus();
+  renderCV();
+}
+function deleteCV(i){let c=getCustom();c.splice(i,1);saveCustom(c);renderCV();}
+
+// ── BOSS nextQ fix ────────────────────────────────────────────────────────
+// Override nextQ inside boss phase for study mode
+const _origNextQ = nextQ;
+function nextQ(){
+  clearTimer();$('fb').textContent='';$('fb').style.color='';$('vsub').textContent='';S.ans=false;
+  if(!S)return;
+  if(S.mode==='review'){nextReviewQ();return;}
+
+  if(S.phase==='b'){
+    let bossArr=S.mode==='study'?STUDY_BOSSES:BOSSES;
+    if(S.bHp<=0){bossEnd();return;}
+    if(!S.bQ.length){let b=bossArr[S.bIdx-1];S.bQ=[...b.pool].sort(()=>Math.random()-.5);}
+    let base=S.bQ.shift();
+    // For study boss, use EXCEL_VERBS; for classic use DEFAULT_VERBS
+    let v,qt,label,sub='';
+    if(S.mode==='study'){
+      let ev=EXCEL_VERBS.find(x=>x.v1===base)||EXCEL_VERBS[0];
+      let q=buildStudyQ(ev);if(!q){nextQ();return;}
+      S.cv={prompt:q.prompt,correct:q.correct,qt:q.type,zh:ev.zh};
+      setVerb(q.display,q.type==='zh'?'→ V1 (base form)':ev.zh);
+      $('qtype').textContent=q.label;
+    } else {
+      v=DEFAULT_VERBS.find(x=>x[0]===base)||DEFAULT_VERBS[0];
+      qt=Math.random()<.5?'v2':'v3';
+      S.cv={prompt:v[0],correct:qt==='v2'?v[1]:v[2],qt,zh:''};
+      setVerb(v[0],'');
+      $('qtype').textContent=qt==='v2'?'V2 — past simple':'V3 — past participle (have ___)';
+    }
+    $('combo').textContent=S.combo>=2?'COMBO x'+S.combo+'!':'';
+    $('ainput').value='';$('ainput').focus();updBoss();S.ans=true;startTimer();
+    return;
+  }
+
+  if(S.mode==='study'){
+    if(S.lap>=5&&S.bIdx<STUDY_BOSSES.length){bossFight(STUDY_BOSSES);return;}
+    let ev=EXCEL_VERBS[Math.floor(Math.random()*EXCEL_VERBS.length)];
+    let q=buildStudyQ(ev);if(!q){nextQ();return;}
+    S.cv={prompt:q.prompt,correct:q.correct,qt:q.type,zh:ev.zh};
+    $('bsec').style.display='none';
+    setVerb(q.display,q.type==='zh'?'→ V1 (base form)':ev.zh);
+    $('qtype').textContent=q.label;
+    $('combo').textContent=S.combo>=2?'COMBO x'+S.combo+'!':'';
+    $('ainput').value='';$('ainput').focus();S.ans=true;startTimer();
+    return;
+  }
+
+  // Classic mode
+  if(S.lap>=5&&S.bIdx<BOSSES.length){bossFight(BOSSES);return;}
+  let pool=getActiveVerbs();
+  let v=pool[Math.floor(Math.random()*pool.length)];
+  let qt=Math.random()<.5?'v2':'v3';
+  S.cv={prompt:v[0],correct:qt==='v2'?v[1]:v[2],qt,zh:''};
+  $('bsec').style.display='none';
+  setVerb(v[0],'');
+  $('qtype').textContent=qt==='v2'?'V2 — past simple':'V3 — past participle (have ___)';
+  $('combo').textContent=S.combo>=2?'COMBO x'+S.combo+'!':'';
+  $('ainput').value='';$('ainput').focus();S.ans=true;startTimer();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+document.getElementById('pname').addEventListener('keydown',e=>{if(e.key==='Enter')tryStart(currentMode||'classic');});
+updateReviewBadge();
+</script>
+</body>
+</html>
