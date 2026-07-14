@@ -428,7 +428,7 @@ input:checked + .slider::before{ transform:translateX(24px); }
 
 /* ============ VERB BLASTER GAME EMBED ============ */
 .verbgame-wrap{ width:100%; height:100%; }
-#verb-game-frame{ display:block; width:100%; height:100%; border:none; }
+.game-frame{ display:block; width:100%; height:100%; border:none; }
 
 .hidden{ display:none !important; }
 

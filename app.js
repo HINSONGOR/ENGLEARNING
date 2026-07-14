@@ -689,15 +689,15 @@ function showScreen(id){
 
 function adjustTopbarPadding(){
   var topbar = $('#topbar');
-  var frame = $('#verb-game-frame');
+  var frames = $all('.game-frame');
   if(!topbar || topbar.classList.contains('hidden')){
     $all('.screen').forEach(function(s){ s.style.paddingTop = ''; });
-    if(frame) frame.style.height = window.innerHeight+'px';
+    frames.forEach(function(f){ f.style.height = window.innerHeight+'px'; });
     return;
   }
   var h = topbar.getBoundingClientRect().height;
   $all('.screen').forEach(function(s){ s.style.paddingTop = (h+12)+'px'; });
-  if(frame) frame.style.height = (window.innerHeight - h - 12)+'px';
+  frames.forEach(function(f){ f.style.height = (window.innerHeight - h - 12)+'px'; });
 }
 window.addEventListener('resize', function(){ adjustTopbarPadding(); });
 
@@ -1450,6 +1450,7 @@ function attachEvents(){
       var m = card.dataset.module;
       if(m === 'reading'){ renderReadingList(); showScreen('screen-reading-list'); }
       else if(m === 'verb'){ showScreen('screen-verb-game'); }
+      else if(m === 'adjadv'){ showScreen('screen-adjadv-game'); }
       else { openNotes(m); }
     };
   });
