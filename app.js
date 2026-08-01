@@ -1475,6 +1475,7 @@ function attachEvents(){
     else { AudioEngine.stopMusic(); $('#btn-music-toggle').textContent='🔇'; }
   };
   $('#btn-settings').onclick = function(){
+    $('#input-rename').value = state.profile.name;
     $('#chk-music-on').checked = state.settings.musicOn;
     $('#range-music-volume').value = state.settings.musicVolume;
     $('#chk-sfx-on').checked = state.settings.sfxOn;
@@ -1485,6 +1486,15 @@ function attachEvents(){
   $('#btn-parent-mode').onclick = function(){ openParentPin(); };
 
   /* ---- settings modal ---- */
+  $('#btn-save-rename').onclick = function(){
+    var newName = $('#input-rename').value.trim();
+    if(!newName){ showToast('請輸入名字！'); return; }
+    state.profile.name = newName;
+    saveState();
+    updateTopbar();
+    renderDashboard();
+    showToast('已改名為「'+newName+'」！');
+  };
   $('#chk-music-on').onchange = function(e){
     state.settings.musicOn = e.target.checked; saveState();
     if(state.settings.musicOn) AudioEngine.startMusic(); else AudioEngine.stopMusic();

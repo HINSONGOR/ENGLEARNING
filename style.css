@@ -426,6 +426,9 @@ button, input, select, textarea{ font-family:var(--font-main); }
 .daily-reward-earned{ font-weight:bold; font-size:18px; color:var(--wood-dark); }
 .levelup-box{ background:linear-gradient(180deg,#fff3c4,var(--parchment)); }
 .settings-row{ display:flex; align-items:center; justify-content:space-between; margin:14px 0; gap:10px; }
+.rename-inline{ display:flex; gap:8px; }
+.rename-inline input{ width:140px; padding:8px 10px; border:2px solid var(--parchment-line); border-radius:6px; font-size:14px; }
+.rename-inline button{ padding:8px 14px; font-size:13px; }
 .settings-row label:first-child{ font-weight:bold; }
 .switch{ position:relative; display:inline-block; width:52px; height:28px; }
 .switch input{ opacity:0; width:0; height:0; }
