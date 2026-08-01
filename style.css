@@ -353,6 +353,19 @@ button, input, select, textarea{ font-family:var(--font-main); }
 .topic-bar-pct{ width:46px; text-align:right; font-weight:bold; font-size:13px; }
 .report-weakness{ display:flex; flex-direction:column; gap:8px; }
 .weakness-item{ background:#ffecec; border:2px solid var(--bad-red); border-radius:8px; padding:8px 14px; font-weight:600; }
+.report-daily-log{ display:flex; flex-direction:column; gap:12px; }
+.daily-log-day{ background:#fff8e8; border:2px solid var(--parchment-line); border-radius:8px; padding:10px 14px; }
+.daily-log-date{
+  font-weight:bold; color:#fff; background:var(--wood-mid); display:inline-block;
+  padding:3px 12px; border-radius:10px; margin-bottom:8px; font-size:13px;
+}
+.daily-log-entry{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;
+  padding:6px 4px; border-top:1px dashed var(--parchment-line);
+}
+.daily-log-entry:first-of-type{ border-top:none; }
+.daily-log-entry .dle-module{ font-weight:600; }
+.daily-log-entry .dle-stats{ color:#666; font-size:13px; }
 .report-badges{ display:flex; gap:12px; flex-wrap:wrap; }
 .badge-chip{ background:var(--gold); border:2px solid var(--gold-dark); border-radius:10px; padding:10px 14px; text-align:center; font-weight:bold; min-width:90px; }
 .badge-chip .badge-emoji{ display:block; font-size:26px; }

@@ -493,6 +493,7 @@ function defaultState(){
     progress: {},
     wrongQuestions: [],
     customQuestions: [],
+    dailyLog: [],
     parent: { pin:'0000' },
     dailyRewardClaimedDate: null
   };
@@ -510,6 +511,7 @@ function loadState(){
       progress: parsed.progress || {},
       wrongQuestions: parsed.wrongQuestions || [],
       customQuestions: parsed.customQuestions || [],
+      dailyLog: parsed.dailyLog || [],
       parent: Object.assign(def.parent, parsed.parent||{})
     });
   }catch(e){ return defaultState(); }
@@ -815,6 +817,26 @@ function moduleAccuracy(moduleId){
 }
 
 /* ======================================================================
+   12b. DAILY ACTIVITY LOG
+   ====================================================================== */
+function recordDailyLog(moduleId, total, correct, durationSec){
+  state.dailyLog.push({
+    date: todayStr(),
+    module: moduleId,
+    total: total,
+    correct: correct,
+    durationSec: durationSec,
+    ts: Date.now()
+  });
+  pruneDailyLog();
+  saveState();
+}
+function pruneDailyLog(){
+  var today = todayStr();
+  state.dailyLog = state.dailyLog.filter(function(e){ return daysBetween(e.date, today) <= 90; });
+}
+
+/* ======================================================================
    13. WRONG QUESTION SYSTEM
    ====================================================================== */
 function recordWrongQuestion(q, moduleId){
@@ -862,7 +884,8 @@ function startQuiz(moduleId, questions, opts){
     timerMode: opts.timerMode || false,
     timerInterval: null,
     passage: opts.passage || null,
-    isWrongRetry: opts.isWrongRetry || false
+    isWrongRetry: opts.isWrongRetry || false,
+    startTime: Date.now()
   };
   showScreen('screen-quiz');
   renderQuestion();
@@ -1052,6 +1075,9 @@ function finishQuiz(){
   $('#result-xp').textContent = '+' + quizSession.xpEarned;
   $('#result-coins').textContent = '+' + quizSession.coinsEarned;
 
+  var durationSec = Math.round((Date.now() - quizSession.startTime)/1000);
+  recordDailyLog(quizSession.moduleId, total, quizSession.correctCount, durationSec);
+
   var badgeBox = $('#result-badge');
   badgeBox.classList.add('hidden');
   if(!state.progress.__firstDone){
@@ -1182,12 +1208,50 @@ function renderWeakness(containerEl){
     containerEl.appendChild(div);
   });
 }
+function formatDuration(sec){
+  if(sec<60) return sec+'秒';
+  var m = Math.floor(sec/60), s = sec%60;
+  return m+'分'+(s>0 ? s+'秒' : '');
+}
+function moduleDisplayName(moduleId){
+  if(MODULES[moduleId]) return MODULES[moduleId].icon+' '+MODULES[moduleId].title;
+  if(moduleId === 'mixed-wrong') return '🏆 錯題重溫';
+  return moduleId;
+}
+function renderDailyLog(containerEl){
+  containerEl.innerHTML = '';
+  if(!state.dailyLog.length){
+    containerEl.innerHTML = '<p class="dash-sub">仲未有練習紀錄，完成一次挑戰就會喺度顯示喇！</p>';
+    return;
+  }
+  var byDate = {};
+  state.dailyLog.forEach(function(e){
+    if(!byDate[e.date]) byDate[e.date] = [];
+    byDate[e.date].push(e);
+  });
+  var dates = Object.keys(byDate).sort(function(a,b){ return b.localeCompare(a); }).slice(0,14);
+  var today = todayStr();
+  dates.forEach(function(date){
+    var dayDiv = document.createElement('div');
+    dayDiv.className = 'daily-log-day';
+    var label = '📅 ' + date + (date===today ? '（今日）' : '');
+    var entries = byDate[date].slice().sort(function(a,b){ return b.ts - a.ts; });
+    var entriesHtml = entries.map(function(e){
+      var acc = e.total>0 ? Math.round((e.correct/e.total)*100) : 0;
+      return '<div class="daily-log-entry"><span class="dle-module">'+moduleDisplayName(e.module)+'</span>'+
+        '<span class="dle-stats">'+e.correct+'/'+e.total+' 題　'+acc+'%　⏱️ '+formatDuration(e.durationSec)+'</span></div>';
+    }).join('');
+    dayDiv.innerHTML = '<span class="daily-log-date">'+label+'</span>'+entriesHtml;
+    containerEl.appendChild(dayDiv);
+  });
+}
 function renderReportCenter(){
   var stats = computeOverallStats();
   $('#report-total-attempted').textContent = stats.totalAttempted;
   $('#report-overall-accuracy').textContent = stats.accuracy+'%';
   $('#report-level').textContent = state.profile.level;
   $('#report-badges-count').textContent = state.profile.badges.length;
+  renderDailyLog($('#report-daily-log'));
   renderTopicChart($('#report-topic-chart'));
   renderWeakness($('#report-weakness'));
   var badgesEl = $('#report-badges');
