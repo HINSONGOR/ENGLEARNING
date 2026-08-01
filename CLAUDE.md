@@ -10,6 +10,8 @@ This folder is a git repo connected to `https://github.com/HINSONGOR/ENGLEARNING
 
 After pushing, GitHub Pages typically takes 1-2 minutes to rebuild — verify with a cache-busted fetch (`fetch(url + '?cachebust=' + Date.now(), {cache:'no-store'})`) before telling the user a change is live; don't just assume it deployed.
 
+**Browser cache gotcha (hit in production 2026-08-01):** GitHub Pages serves `app.js`/`style.css` with `Cache-Control: max-age=600` and no versioning, so a browser that visited within the last 10 minutes can keep running old JS/CSS even though the server already has the new file — a cache-busted `fetch()` check can say "live" while the actual page (loaded via plain `<script src="app.js">`) is still stale. Fixed by adding a `?v=YYYYMMDDx` query string to the `style.css`/`app.js` `<link>`/`<script>` tags in `index.html` — **bump that version string every time app.js or style.css changes**, or this regresses.
+
 ## Sibling projects (same GitHub account, same pattern)
 
 - `C:\HinsonChineseLearning` → `github.com/HINSONGOR/HinsonChineseLearning` → `hinsongor.github.io/HinsonChineseLearning/`
