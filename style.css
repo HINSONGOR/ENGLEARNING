@@ -354,6 +354,11 @@ button, input, select, textarea{ font-family:var(--font-main); }
 .dict-answer-compare p{ margin:4px 0; }
 .diff-match{ color:var(--ok-green-dark); }
 .diff-miss{ color:var(--bad-red-dark); text-decoration:underline; text-decoration-style:wavy; }
+#dictq-answer-input{
+  width:100%; padding:26px 20px; font-size:30px; text-align:center;
+  border:3px solid var(--wood-dark); border-radius:10px;
+  background:#fff8e8; margin:14px 0;
+}
 
 /* ============ RESULT ============ */
 .result-wrap{ max-width:640px; margin:60px auto; padding:0 20px; position:relative; z-index:1; }
