@@ -689,6 +689,12 @@ function splitIntoSentences(text){
   return matches.map(function(s){ return s.trim(); }).filter(Boolean);
 }
 
+/* blank line(s) = paragraph break; each paragraph is then split into sentences */
+function splitIntoParagraphs(text){
+  var blocks = (text || '').split(/\n\s*\n+/).map(function(b){ return b.trim(); }).filter(Boolean);
+  return blocks.map(splitIntoSentences).filter(function(sentences){ return sentences.length>0; });
+}
+
 /* ======================================================================
    7. PARTICLE EFFECTS (canvas)
    ====================================================================== */
@@ -1194,17 +1200,60 @@ function renderDictionSetList(){
   var sets = getAllDictationSets();
   sets.forEach(function(s){
     var acc = dictationAccuracy(s.id);
-    var btn = document.createElement('button');
-    btn.className = 'module-card special';
-    btn.innerHTML = '<span class="module-icon">'+(s.icon||'✍️')+'</span>'+
-      '<span class="module-title">'+s.title+'<br>'+(DICT_TYPE_LABEL[s.type]||'詞語')+' x '+s.items.length+'</span>'+
-      '<span class="module-progress"><span class="bar"><span class="bar-fill" style="width:'+(acc===null?0:acc)+'%"></span></span></span>';
-    btn.onclick = function(){ startDictation(s.id, s.items); };
-    wrap.appendChild(btn);
+    if(s.type === 'passage' && s.paragraphs && s.paragraphs.length>0){
+      var card = document.createElement('div');
+      card.className = 'module-card special dict-passage-card';
+      var defaultDraw = Math.min(2, s.paragraphs.length);
+      var options = '';
+      for(var n=1; n<=s.paragraphs.length; n++){
+        options += '<option value="'+n+'"'+(n===defaultDraw?' selected':'')+'>'+n+'</option>';
+      }
+      card.innerHTML = '<span class="module-icon">'+(s.icon||'📄')+'</span>'+
+        '<span class="module-title">'+s.title+'<br>共 '+s.paragraphs.length+' 段</span>'+
+        '<span class="module-progress"><span class="bar"><span class="bar-fill" style="width:'+(acc===null?0:acc)+'%"></span></span></span>'+
+        '<div class="dict-passage-actions">'+
+        '<div class="dict-draw-row"><label>抽</label><select class="dict-draw-count" data-draw-select="'+s.id+'">'+options+'</select><label>段模擬測驗</label></div>'+
+        '<button class="btn-primary" data-draw-random="'+s.id+'">🎲 開始隨機默書</button>'+
+        '<button class="btn-secondary" data-draw-all="'+s.id+'">📖 全部'+s.paragraphs.length+'段練習</button>'+
+        '</div>';
+      wrap.appendChild(card);
+    } else {
+      var btn = document.createElement('button');
+      btn.className = 'module-card special';
+      btn.innerHTML = '<span class="module-icon">'+(s.icon||'✍️')+'</span>'+
+        '<span class="module-title">'+s.title+'<br>'+(DICT_TYPE_LABEL[s.type]||'詞語')+' x '+s.items.length+'</span>'+
+        '<span class="module-progress"><span class="bar"><span class="bar-fill" style="width:'+(acc===null?0:acc)+'%"></span></span></span>';
+      btn.onclick = function(){ startDictation(s.id, s.items); };
+      wrap.appendChild(btn);
+    }
+  });
+  $all('[data-draw-random]', wrap).forEach(function(btn){
+    btn.onclick = function(){
+      var setId = btn.dataset.drawRandom;
+      var set = findDictationSet(setId);
+      var countSel = wrap.querySelector('[data-draw-select="'+setId+'"]');
+      var n = countSel ? parseInt(countSel.value,10) : 2;
+      startDictationFromParagraphs(set, n);
+    };
+  });
+  $all('[data-draw-all]', wrap).forEach(function(btn){
+    btn.onclick = function(){
+      var set = findDictationSet(btn.dataset.drawAll);
+      startDictation(set.id, set.items);
+    };
   });
   if(sets.length===0){
     wrap.innerHTML = '<p class="dash-sub">暫時未有默書表，請叫家長喺「家長模式 → 默書表」新增！</p>';
   }
+}
+
+function startDictationFromParagraphs(set, n){
+  var count = clamp(n, 1, set.paragraphs.length);
+  var chosen = shuffle(set.paragraphs).slice(0, count);
+  var chosenIds = chosen.map(function(p){ return p.id; });
+  var ordered = set.paragraphs.filter(function(p){ return chosenIds.indexOf(p.id) !== -1; });
+  var items = ordered.reduce(function(acc,p){ return acc.concat(p.sentences); }, []);
+  startDictation(set.id, items);
 }
 
 function startDictation(setId, items){
@@ -1222,7 +1271,10 @@ function startDictation(setId, items){
 
 function renderDictItem(){
   var total = dictSession.items.length;
-  $('#dict-progress-text').textContent = '第 '+(dictSession.index+1)+' / '+total+' 題';
+  var item = dictSession.items[dictSession.index];
+  var label = '第 '+(dictSession.index+1)+' / '+total+' 題';
+  if(item.p) label = '第 '+item.p+' 段　'+label;
+  $('#dict-progress-text').textContent = label;
   $('#dict-progress-fill').style.width = Math.round((dictSession.index/total)*100)+'%';
   dictSession.playCount = 0;
   $('#dict-play-count').textContent = '';
@@ -1253,7 +1305,15 @@ function renderDictCheckList(){
   $('#dict-check-result').classList.add('hidden');
   $('#dict-check-actions').classList.remove('hidden');
   $('#dict-result-actions').classList.add('hidden');
+  var lastP = null;
   dictSession.items.forEach(function(item, i){
+    if(item.p && item.p !== lastP){
+      lastP = item.p;
+      var header = document.createElement('div');
+      header.className = 'dict-check-para-header';
+      header.textContent = '📄 第 '+item.p+' 段';
+      wrap.appendChild(header);
+    }
     var div = document.createElement('div');
     div.className = 'wrong-item dict-check-row';
     div.innerHTML = '<div class="wrong-item-info">'+
@@ -1666,7 +1726,10 @@ function renderParentDictSetList(){
   state.dictationSets.forEach(function(s){
     var div = document.createElement('div');
     div.className = 'parent-question-item';
-    div.innerHTML = '<div><span class="wrong-item-tag">'+(DICT_TYPE_LABEL[s.type]||'詞語')+'</span><div>'+s.title+'（'+s.items.length+' 項）</div></div>'+
+    var countLabel = (s.type==='passage' && s.paragraphs)
+      ? s.paragraphs.length+' 段／'+s.items.length+' 句'
+      : s.items.length+' 項';
+    div.innerHTML = '<div><span class="wrong-item-tag">'+(DICT_TYPE_LABEL[s.type]||'詞語')+'</span><div>'+s.title+'（'+countLabel+'）</div></div>'+
       '<div class="pq-actions"><button class="btn-secondary" data-del-dictset="'+s.id+'">🗑️ 刪除</button></div>';
     wrap.appendChild(div);
   });
@@ -1682,13 +1745,33 @@ function renderParentDictSetList(){
 }
 var DICT_TYPE_ICON = { word:'🖋️', sentence:'📜', passage:'📄' };
 var DICT_TYPE_LABEL = { word:'詞語', sentence:'句子', passage:'段落' };
-function addCustomDictSet(title, type, lines){
+/* passage type: raw text with blank-line-separated paragraphs → { paragraphs, items }
+   word/sentence type: raw text with one line per item → { items } */
+function addCustomDictSet(title, type, raw){
   var setId = uid('dictset');
-  var items = lines.map(function(line, i){ return { id: setId+'-'+i, text: line }; });
-  state.dictationSets.push({ id:setId, title:title, icon: DICT_TYPE_ICON[type] || '✍️', type:type, items:items });
+  var setObj = { id:setId, title:title, type:type, icon: DICT_TYPE_ICON[type] || '✍️' };
+
+  if(type === 'passage'){
+    var paraSentences = splitIntoParagraphs(raw);
+    var paragraphs = paraSentences.map(function(sentences, pi){
+      return { id: setId+'-p'+pi, sentences: sentences.map(function(s, si){
+        return { id: setId+'-p'+pi+'-s'+si, text: s, p: pi+1 };
+      }) };
+    });
+    var items = paragraphs.reduce(function(acc,p){ return acc.concat(p.sentences); }, []);
+    if(items.length===0) return null;
+    setObj.paragraphs = paragraphs;
+    setObj.items = items;
+  } else {
+    var lines = (raw||'').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    if(lines.length===0) return null;
+    setObj.items = lines.map(function(line, i){ return { id: setId+'-'+i, text: line }; });
+  }
+
+  state.dictationSets.push(setObj);
   saveState();
   renderParentDictSetList();
-  return items.length;
+  return { count: setObj.items.length, paragraphCount: setObj.paragraphs ? setObj.paragraphs.length : 0 };
 }
 
 /* ---- import pipeline ---- */
@@ -1971,13 +2054,12 @@ function attachEvents(){
     var title = $('#ds-title').value.trim();
     var type = $('#ds-type').value;
     var raw = $('#ds-items').value;
-    var lines = type === 'passage'
-      ? splitIntoSentences(raw)
-      : raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
     if(!title){ showToast('請輸入默書表名稱！'); return; }
-    if(lines.length===0){ showToast('請輸入至少一項內容！'); return; }
-    var count = addCustomDictSet(title, type, lines);
-    showToast('已新增默書表「'+title+'」，共 '+count+' 項！');
+    var result = addCustomDictSet(title, type, raw);
+    if(!result){ showToast('請輸入至少一項內容！'); return; }
+    var msg = '已新增默書表「'+title+'」，共 '+result.count+' 項';
+    if(result.paragraphCount) msg += '（'+result.paragraphCount+' 段）';
+    showToast(msg+'！');
     e.target.reset();
   };
 

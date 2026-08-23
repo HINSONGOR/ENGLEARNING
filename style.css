@@ -327,6 +327,16 @@ button, input, select, textarea{ font-family:var(--font-main); }
 .dict-mark-correct.active{ background:var(--ok-green); border-color:var(--ok-green-dark); }
 .dict-mark-wrong.active{ background:var(--bad-red); border-color:var(--bad-red-dark); }
 .dict-bonus-text{ grid-column:1 / -1; text-align:center; font-weight:bold; margin-top:8px; }
+.dict-passage-card{ cursor:default; }
+.dict-passage-actions{ display:flex; flex-direction:column; gap:8px; width:100%; margin-top:4px; }
+.dict-draw-row{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:normal; flex-wrap:wrap; }
+.dict-draw-count{ padding:4px 8px; border:2px solid var(--parchment-line); border-radius:6px; font-weight:bold; }
+.dict-passage-actions .btn-primary, .dict-passage-actions .btn-secondary{ padding:9px 12px; font-size:13px; width:100%; box-shadow:2px 2px 0 rgba(0,0,0,.3); }
+.dict-check-para-header{
+  font-weight:bold; color:#fff; background:var(--wood-mid); display:inline-block;
+  padding:4px 14px; border-radius:10px; margin:14px 0 4px; font-size:13px;
+}
+.dict-check-para-header:first-child{ margin-top:0; }
 
 /* ============ RESULT ============ */
 .result-wrap{ max-width:640px; margin:60px auto; padding:0 20px; position:relative; z-index:1; }

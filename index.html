@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260823a">
+<link rel="stylesheet" href="style.css?v=20260823c">
 </head>
 <body>
 
@@ -514,7 +514,7 @@
 
       <div id="parent-tab-dictation" class="parent-tab-content">
         <h3 class="section-title">新增默書表</h3>
-        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成段文章就揀「段落」，系統會自動按句號／問號／驚嘆號斷句。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。</p>
+        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成篇文章就揀「段落」，段與段之間留返一行空白（保留原文段落），系統會自動幫每段斷句。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。「段落」型默書表可以喺練習畫面揀「隨機抽 X 段」，模擬學校淨係抽默書範圍入面其中幾段嘅測驗方式。</p>
         <form id="form-add-dictset" class="add-question-form">
           <label>默書表名稱</label>
           <input type="text" id="ds-title" placeholder="例如：第10週學校默書表">
@@ -525,7 +525,7 @@
             <option value="passage">段落 Passage（自動斷句）</option>
           </select>
           <label>內容</label>
-          <textarea id="ds-items" rows="8" placeholder="umbrella&#10;sunscreen&#10;architect"></textarea>
+          <textarea id="ds-items" rows="8" placeholder="詞語／句子：一行一個&#10;&#10;段落範例：&#10;Tommy was a young wizard. He loved magic.&#10;&#10;One day, he met a dragon. It was friendly."></textarea>
           <button type="submit" class="btn-primary">➕ 新增默書表</button>
         </form>
         <h3 class="section-title">現有默書表（家長自訂）</h3>
@@ -598,6 +598,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260823b"></script>
+<script src="app.js?v=20260823c"></script>
 </body>
 </html>
