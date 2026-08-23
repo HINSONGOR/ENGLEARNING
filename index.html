@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260823c">
+<link rel="stylesheet" href="style.css?v=20260823d">
 </head>
 <body>
 
@@ -376,7 +376,11 @@
   <div class="dashboard-wrap">
     <div class="block-panel">
       <h2>✍️ 默書 Dictation Room</h2>
-      <p class="dash-sub">揀一份默書表，睇住螢幕撳掣聽讀，喺紙上寫低啱啱聽到嘅英文 — 唔使喺電腦度打字！</p>
+      <p class="dash-sub">揀一份默書表，聽讀之後將答案寫低。</p>
+      <label class="dict-mode-toggle">
+        <input type="checkbox" id="chk-dict-typed-mode">
+        <span>⌨️ 打字作答（自動批改）－ 唔剔就用 📝 紙筆作答（自己核對）</span>
+      </label>
       <div class="module-grid" id="dictation-set-list"></div>
     </div>
   </div>
@@ -421,6 +425,38 @@
       <div id="dict-result-actions" class="result-actions hidden">
         <button id="btn-dict-retry" class="btn-secondary">🔁 再默一次</button>
         <button id="btn-dict-home" class="btn-primary">🏠 返回主頁</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: DICTATION TYPED QUIZ (auto-marked) ============ -->
+<section id="screen-dictation-quiz" class="screen">
+  <div class="quiz-wrap">
+    <div class="quiz-hud">
+      <div class="quiz-progress">
+        <span id="dictq-progress-text">第 1 / 10 題</span>
+        <div class="bar quiz-progress-bar"><span class="bar-fill" id="dictq-progress-fill"></span></div>
+      </div>
+    </div>
+    <div class="quiz-card block-panel dictation-card" id="dictq-card">
+      <button id="btn-dictq-play" class="btn-primary btn-big dict-play-btn">🔊 播放</button>
+      <div class="dict-play-count" id="dictq-play-count"></div>
+      <label class="timer-toggle">
+        <input type="checkbox" id="chk-dictq-slow"> 🐢 慢速播放
+      </label>
+      <div class="quiz-fill-wrap">
+        <input type="text" id="dictq-answer-input" placeholder="請輸入你聽到嘅英文...">
+      </div>
+      <button id="btn-dictq-submit" class="btn-primary btn-big">✅ 提交答案</button>
+
+      <div id="dictq-feedback-box" class="feedback-box hidden">
+        <div id="dictq-feedback-result" class="feedback-result"></div>
+        <div class="dict-answer-compare">
+          <p><strong>正確答案：</strong><span id="dictq-correct-display"></span></p>
+          <p><strong>你嘅答案：</strong><span id="dictq-user-display"></span></p>
+        </div>
+        <button id="btn-dictq-next" class="btn-primary btn-big">➡️ 下一題</button>
       </div>
     </div>
   </div>
@@ -598,6 +634,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260823c"></script>
+<script src="app.js?v=20260823d"></script>
 </body>
 </html>
