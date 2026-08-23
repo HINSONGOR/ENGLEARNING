@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260801b">
+<link rel="stylesheet" href="style.css?v=20260823a">
 </head>
 <body>
 
@@ -188,6 +188,10 @@
           <span class="module-title">閱讀理解<br>Reading Room</span>
           <span class="module-progress"><span class="bar"><span class="bar-fill" data-bar="reading"></span></span></span>
         </button>
+        <button class="module-card special" data-module="dictation">
+          <span class="module-icon">✍️</span>
+          <span class="module-title">默書<br>Dictation Room</span>
+        </button>
         <button class="module-card special" id="btn-wrong-center">
           <span class="module-icon">🏆</span>
           <span class="module-title">錯題重溫中心<br><span id="wrong-count-badge">0 題待複習</span></span>
@@ -301,6 +305,13 @@
         <button id="btn-clear-mastered" class="btn-secondary">🧹 清除已掌握</button>
       </div>
       <div id="wrong-list" class="wrong-list"></div>
+
+      <h3 class="section-title">✍️ 默書錯字複習</h3>
+      <div id="dict-wrong-list" class="wrong-list"></div>
+      <div class="wrong-filter-row">
+        <button id="btn-dict-retry-wrong" class="btn-primary">🔊 重新聽寫呢批錯字</button>
+        <button id="btn-dict-clear-mastered" class="btn-secondary">🧹 清除已掌握</button>
+      </div>
     </div>
   </div>
 </section>
@@ -322,6 +333,9 @@
 
       <h3 class="section-title">📊 各單元準確率</h3>
       <div id="report-topic-chart" class="report-topic-chart"></div>
+
+      <h3 class="section-title">✍️ 默書準確率</h3>
+      <div id="report-dict-chart" class="report-topic-chart"></div>
 
       <h3 class="section-title">⚠️ 弱點分析</h3>
       <div id="report-weakness" class="report-weakness"></div>
@@ -357,6 +371,61 @@
   </div>
 </section>
 
+<!-- ============ SCREEN: DICTATION LIST ============ -->
+<section id="screen-dictation-list" class="screen">
+  <div class="dashboard-wrap">
+    <div class="block-panel">
+      <h2>✍️ 默書 Dictation Room</h2>
+      <p class="dash-sub">揀一份默書表，睇住螢幕撳掣聽讀，喺紙上寫低啱啱聽到嘅英文 — 唔使喺電腦度打字！</p>
+      <div class="module-grid" id="dictation-set-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: DICTATION PLAY ============ -->
+<section id="screen-dictation-play" class="screen">
+  <div class="quiz-wrap">
+    <div class="quiz-hud">
+      <div class="quiz-progress">
+        <span id="dict-progress-text">第 1 / 10 題</span>
+        <div class="bar quiz-progress-bar"><span class="bar-fill" id="dict-progress-fill"></span></div>
+      </div>
+    </div>
+    <div class="quiz-card block-panel dictation-card">
+      <p class="dash-sub dict-instruction">📝 請喺紙上寫低你聽到嘅英文，寫完先撳「下一題」</p>
+      <button id="btn-dict-play" class="btn-primary btn-big dict-play-btn">🔊 播放</button>
+      <div class="dict-play-count" id="dict-play-count"></div>
+      <label class="timer-toggle">
+        <input type="checkbox" id="chk-dict-slow"> 🐢 慢速播放
+      </label>
+      <div class="dict-nav-row">
+        <button id="btn-dict-cancel" class="btn-secondary">⏮ 返回默書表</button>
+        <button id="btn-dict-next" class="btn-primary">➡️ 下一題</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREEN: DICTATION SELF-CHECK ============ -->
+<section id="screen-dictation-check" class="screen">
+  <div class="quiz-wrap">
+    <div class="block-panel">
+      <h2>📖 對答案時間</h2>
+      <p class="dash-sub">同紙上寫嘅逐題比較，啱就撳 ✅，錯就撳 ❌，check晒之後撳「提交批改結果」。</p>
+      <div id="dict-check-result" class="result-stats hidden"></div>
+      <div id="dict-check-list" class="wrong-list"></div>
+      <div class="result-actions" id="dict-check-actions">
+        <button id="btn-dict-mark-all" class="btn-secondary">✅ 全部標啱</button>
+        <button id="btn-dict-submit" class="btn-primary">📩 提交批改結果</button>
+      </div>
+      <div id="dict-result-actions" class="result-actions hidden">
+        <button id="btn-dict-retry" class="btn-secondary">🔁 再默一次</button>
+        <button id="btn-dict-home" class="btn-primary">🏠 返回主頁</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ SCREEN: PARENT MODE - PIN ============ -->
 <section id="screen-parent-pin" class="screen">
   <div class="login-card block-panel">
@@ -379,6 +448,7 @@
         <button class="parent-tab active" data-tab="stats">📊 學習統計</button>
         <button class="parent-tab" data-tab="bank">📋 題目管理</button>
         <button class="parent-tab" data-tab="import">📥 匯入題目</button>
+        <button class="parent-tab" data-tab="dictation">✍️ 默書表</button>
         <button class="parent-tab" data-tab="settings">⚙️ 設定</button>
         <button id="btn-parent-exit" class="btn-secondary">🚪 離開家長模式</button>
       </div>
@@ -440,6 +510,25 @@
           <button id="btn-confirm-import" class="btn-primary">✅ 確認匯入</button>
         </div>
         <div id="import-preview-list" class="parent-question-list"></div>
+      </div>
+
+      <div id="parent-tab-dictation" class="parent-tab-content">
+        <h3 class="section-title">新增默書表</h3>
+        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容，每行一個詞語（或一句），就會自動變成一份可以聽寫嘅默書表。</p>
+        <form id="form-add-dictset" class="add-question-form">
+          <label>默書表名稱</label>
+          <input type="text" id="ds-title" placeholder="例如：第10週學校默書表">
+          <label>類型</label>
+          <select id="ds-type">
+            <option value="word">詞語 Words</option>
+            <option value="sentence">句子 Sentences</option>
+          </select>
+          <label>內容（每行一個詞語／一句）</label>
+          <textarea id="ds-items" rows="8" placeholder="umbrella&#10;sunscreen&#10;architect"></textarea>
+          <button type="submit" class="btn-primary">➕ 新增默書表</button>
+        </form>
+        <h3 class="section-title">現有默書表（家長自訂）</h3>
+        <div id="parent-dictset-list" class="parent-question-list"></div>
       </div>
 
       <div id="parent-tab-settings" class="parent-tab-content">
@@ -508,6 +597,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260801b"></script>
+<script src="app.js?v=20260823a"></script>
 </body>
 </html>

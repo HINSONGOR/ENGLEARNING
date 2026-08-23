@@ -466,6 +466,36 @@ var READING_PASSAGES = [
 ];
 
 /* ======================================================================
+   3b. DICTATION SETS (默書) — audio-only, self-checked on paper
+   ====================================================================== */
+var DICTATION_SETS = [
+  { id:'dictset1', title:'核心生字默書 Unit 1-5', icon:'🖋️', type:'word',
+    items:[
+      { id:'dictset1-w1', text:'umbrella' }, { id:'dictset1-w2', text:'sunscreen' },
+      { id:'dictset1-w3', text:'shelf' }, { id:'dictset1-w4', text:'director' },
+      { id:'dictset1-w5', text:'stuntman' }, { id:'dictset1-w6', text:'costume' },
+      { id:'dictset1-w7', text:'exhaust' }, { id:'dictset1-w8', text:'recycled' },
+      { id:'dictset1-w9', text:'leather' }, { id:'dictset1-w10', text:'architect' },
+      { id:'dictset1-w11', text:'client' }, { id:'dictset1-w12', text:'artist' },
+      { id:'dictset1-w13', text:'encourage' }, { id:'dictset1-w14', text:'decide' },
+      { id:'dictset1-w15', text:'remind' }
+    ] },
+  { id:'dictset2', title:'佳句默書 Unit 1-5', icon:'📜', type:'sentence',
+    items:[
+      { id:'dictset2-s1', text:'If you mix red and yellow, you get orange.' },
+      { id:'dictset2-s2', text:'The bag is too heavy to carry.' },
+      { id:'dictset2-s3', text:'Although Helen is ill, she still goes to school.' },
+      { id:'dictset2-s4', text:'Diana has worked here since 2009.' },
+      { id:'dictset2-s5', text:'The director told the stuntman to jump higher.' },
+      { id:'dictset2-s6', text:'Old bottles are recycled every day.' },
+      { id:'dictset2-s7', text:'The shirt is made by Victory Fashion.' },
+      { id:'dictset2-s8', text:'If it rains, I will stay at home.' }
+    ] }
+];
+function getAllDictationSets(){ return DICTATION_SETS.concat(state.dictationSets); }
+function findDictationSet(setId){ return getAllDictationSets().find(function(s){ return s.id===setId; }); }
+
+/* ======================================================================
    4. BADGES
    ====================================================================== */
 var ALL_BADGES = [
@@ -495,7 +525,10 @@ function defaultState(){
     customQuestions: [],
     dailyLog: [],
     parent: { pin:'0000' },
-    dailyRewardClaimedDate: null
+    dailyRewardClaimedDate: null,
+    dictationSets: [],
+    dictationProgress: {},
+    dictationWrong: []
   };
 }
 
@@ -512,7 +545,10 @@ function loadState(){
       wrongQuestions: parsed.wrongQuestions || [],
       customQuestions: parsed.customQuestions || [],
       dailyLog: parsed.dailyLog || [],
-      parent: Object.assign(def.parent, parsed.parent||{})
+      parent: Object.assign(def.parent, parsed.parent||{}),
+      dictationSets: parsed.dictationSets || [],
+      dictationProgress: parsed.dictationProgress || {},
+      dictationWrong: parsed.dictationWrong || []
     });
   }catch(e){ return defaultState(); }
 }
@@ -608,6 +644,22 @@ function speakText(text){
     if(hkVoice) utter.voice = hkVoice;
     utter.lang = (hkVoice && hkVoice.lang) || 'zh-HK';
     utter.rate = clamp((state.settings.ttsRate||90)/100, 0.5, 1.5);
+    window.speechSynthesis.speak(utter);
+  }catch(e){}
+}
+
+function speakEnglish(text, rate){
+  try{
+    if(!('speechSynthesis' in window)) { showToast('呢部裝置唔支援語音朗讀'); return; }
+    window.speechSynthesis.cancel();
+    var utter = new SpeechSynthesisUtterance(text);
+    var voices = window.speechSynthesis.getVoices();
+    var enVoice = voices.find(function(v){ return /en-GB/i.test(v.lang); }) ||
+                  voices.find(function(v){ return /en-US/i.test(v.lang); }) ||
+                  voices.find(function(v){ return /^en/i.test(v.lang); });
+    if(enVoice) utter.voice = enVoice;
+    utter.lang = (enVoice && enVoice.lang) || 'en-US';
+    utter.rate = clamp(rate || 0.8, 0.4, 1.2);
     window.speechSynthesis.speak(utter);
   }catch(e){}
 }
@@ -1101,6 +1153,224 @@ function finishQuiz(){
 }
 
 /* ======================================================================
+   14b. DICTATION ENGINE (默書) — audio playback only, self-checked on paper
+   ====================================================================== */
+var dictSession = null;
+
+function dictationAccuracy(setId){
+  var p = state.dictationProgress[setId];
+  if(!p || p.attempted===0) return null;
+  return Math.round((p.correct/p.attempted)*100);
+}
+
+function renderDictionSetList(){
+  var wrap = $('#dictation-set-list');
+  wrap.innerHTML = '';
+  var sets = getAllDictationSets();
+  sets.forEach(function(s){
+    var acc = dictationAccuracy(s.id);
+    var btn = document.createElement('button');
+    btn.className = 'module-card special';
+    btn.innerHTML = '<span class="module-icon">'+(s.icon||'✍️')+'</span>'+
+      '<span class="module-title">'+s.title+'<br>'+(s.type==='sentence'?'句子':'詞語')+' x '+s.items.length+'</span>'+
+      '<span class="module-progress"><span class="bar"><span class="bar-fill" style="width:'+(acc===null?0:acc)+'%"></span></span></span>';
+    btn.onclick = function(){ startDictation(s.id, s.items); };
+    wrap.appendChild(btn);
+  });
+  if(sets.length===0){
+    wrap.innerHTML = '<p class="dash-sub">暫時未有默書表，請叫家長喺「家長模式 → 默書表」新增！</p>';
+  }
+}
+
+function startDictation(setId, items){
+  dictSession = {
+    setId: setId,
+    items: items.slice(),
+    index: 0,
+    marks: items.map(function(){ return null; }),
+    playCount: 0,
+    startTime: Date.now()
+  };
+  showScreen('screen-dictation-play');
+  renderDictItem();
+}
+
+function renderDictItem(){
+  var total = dictSession.items.length;
+  $('#dict-progress-text').textContent = '第 '+(dictSession.index+1)+' / '+total+' 題';
+  $('#dict-progress-fill').style.width = Math.round((dictSession.index/total)*100)+'%';
+  dictSession.playCount = 0;
+  $('#dict-play-count').textContent = '';
+  $('#btn-dict-next').textContent = (dictSession.index === total-1) ? '✅ 完成，去對答案' : '➡️ 下一題';
+}
+
+function playCurrentDictItem(){
+  var item = dictSession.items[dictSession.index];
+  var slow = $('#chk-dict-slow').checked;
+  speakEnglish(item.text, slow ? 0.55 : 0.8);
+  dictSession.playCount++;
+  $('#dict-play-count').textContent = '已播放 '+dictSession.playCount+' 次';
+}
+
+function nextDictItem(){
+  dictSession.index++;
+  if(dictSession.index >= dictSession.items.length){
+    renderDictCheckList();
+    showScreen('screen-dictation-check');
+  } else {
+    renderDictItem();
+  }
+}
+
+function renderDictCheckList(){
+  var wrap = $('#dict-check-list');
+  wrap.innerHTML = '';
+  $('#dict-check-result').classList.add('hidden');
+  $('#dict-check-actions').classList.remove('hidden');
+  $('#dict-result-actions').classList.add('hidden');
+  dictSession.items.forEach(function(item, i){
+    var div = document.createElement('div');
+    div.className = 'wrong-item dict-check-row';
+    div.innerHTML = '<div class="wrong-item-info">'+
+      '<span class="wrong-item-tag">第 '+(i+1)+' 題</span>'+
+      '<div class="wrong-item-q dict-check-text">'+item.text+'</div></div>'+
+      '<div class="dict-check-actions">'+
+      '<button class="icon-btn speaker-btn" data-dict-replay="'+i+'" title="再聽一次">🔊</button>'+
+      '<button class="dict-mark-btn dict-mark-correct" data-dict-mark="'+i+'" data-val="1">✅</button>'+
+      '<button class="dict-mark-btn dict-mark-wrong" data-dict-mark="'+i+'" data-val="0">❌</button>'+
+      '</div>';
+    wrap.appendChild(div);
+  });
+  $all('[data-dict-replay]', wrap).forEach(function(btn){
+    btn.onclick = function(){ var item = dictSession.items[parseInt(btn.dataset.dictReplay,10)]; speakEnglish(item.text, 0.8); };
+  });
+  $all('[data-dict-mark]', wrap).forEach(function(btn){
+    btn.onclick = function(){
+      var idx = parseInt(btn.dataset.dictMark,10);
+      var val = btn.dataset.val === '1';
+      dictSession.marks[idx] = val;
+      var row = btn.closest('.dict-check-row');
+      $all('.dict-mark-btn', row).forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    };
+  });
+}
+
+function markAllDictCorrect(){
+  dictSession.items.forEach(function(item, i){ dictSession.marks[i] = true; });
+  $all('.dict-check-row').forEach(function(row){
+    $all('.dict-mark-correct', row).forEach(function(b){ b.classList.add('active'); });
+    $all('.dict-mark-wrong', row).forEach(function(b){ b.classList.remove('active'); });
+  });
+}
+
+function recordDictationWrong(item, setId){
+  var existing = state.dictationWrong.find(function(w){ return w.itemId === item.id; });
+  if(existing){ existing.timesWrong++; existing.mastered = false; existing.lastWrongAt = Date.now(); }
+  else {
+    state.dictationWrong.push({ id: uid('dw'), itemId: item.id, setId: setId, text: item.text, timesWrong:1, mastered:false, lastWrongAt: Date.now() });
+  }
+}
+function markDictationMastered(itemId){
+  var w = state.dictationWrong.find(function(x){ return x.itemId===itemId; });
+  if(w) w.mastered = true;
+}
+
+function submitDictCheck(){
+  if(dictSession.marks.some(function(m){ return m===null; })){
+    showToast('請將每一題都標為 ✅ 或 ❌ 先可以提交！');
+    return;
+  }
+  var total = dictSession.items.length;
+  var correctCount = dictSession.marks.filter(Boolean).length;
+  var xpEarned = 0, coinsEarned = 0;
+
+  dictSession.items.forEach(function(item, i){
+    if(dictSession.marks[i]){ xpEarned += 10; coinsEarned += 5; markDictationMastered(item.id); }
+    else { xpEarned += 2; recordDictationWrong(item, dictSession.setId); }
+  });
+  addXP(xpEarned); addCoins(coinsEarned);
+
+  if(!state.dictationProgress[dictSession.setId]) state.dictationProgress[dictSession.setId] = { attempted:0, correct:0 };
+  state.dictationProgress[dictSession.setId].attempted += total;
+  state.dictationProgress[dictSession.setId].correct += correctCount;
+
+  var durationSec = Math.round((Date.now() - dictSession.startTime)/1000);
+  recordDailyLog('dict:'+dictSession.setId, total, correctCount, durationSec);
+
+  if(!state.progress.__firstDone){ state.progress.__firstDone = true; unlockBadge('first_steps'); }
+
+  var accuracy = total>0 ? Math.round((correctCount/total)*100) : 0;
+  var bonusText = '';
+  if(accuracy === 100 && total>0){
+    unlockBadge('perfect_score');
+    addXP(20); addCoins(10);
+    xpEarned += 20; coinsEarned += 10;
+    bonusText = '🎉 完美默書！額外 +20 XP +10 金幣！';
+  }
+  saveState();
+
+  $('#dict-check-actions').classList.add('hidden');
+  $('#dict-result-actions').classList.remove('hidden');
+  var resultBox = $('#dict-check-result');
+  resultBox.classList.remove('hidden');
+  resultBox.innerHTML =
+    '<div class="result-stat"><span class="stat-num">'+correctCount+' / '+total+'</span><span>分數</span></div>'+
+    '<div class="result-stat"><span class="stat-num">'+accuracy+'%</span><span>準確率</span></div>'+
+    '<div class="result-stat"><span class="stat-num">+'+xpEarned+'</span><span>經驗值</span></div>'+
+    '<div class="result-stat"><span class="stat-num">+'+coinsEarned+'</span><span>金幣</span></div>';
+  if(bonusText){
+    var bonusEl = document.createElement('p');
+    bonusEl.className = 'dash-sub dict-bonus-text';
+    bonusEl.textContent = bonusText;
+    resultBox.appendChild(bonusEl);
+  }
+  AudioEngine.sfx(accuracy>=70?'correct':'wrong');
+}
+
+function retryDictationWrong(){
+  var items = state.dictationWrong.filter(function(w){ return !w.mastered; }).map(function(w){ return { id:w.itemId, text:w.text }; });
+  if(items.length===0){ showToast('冇默書錯字要重溫啦！'); return; }
+  startDictation('dict-wrong-review', items);
+}
+
+function renderDictWrongList(){
+  var list = $('#dict-wrong-list');
+  list.innerHTML = '';
+  var items = state.dictationWrong.filter(function(w){ return !w.mastered; });
+  if(items.length===0){
+    list.innerHTML = '<p class="dash-sub">暫時冇待複習嘅默書錯字，繼續保持！🎉</p>';
+    return;
+  }
+  items.forEach(function(w){
+    var set = findDictationSet(w.setId);
+    var div = document.createElement('div');
+    div.className = 'wrong-item';
+    div.innerHTML = '<div class="wrong-item-info">'+
+      '<span class="wrong-item-tag">'+(set?set.title:'默書')+'</span>'+
+      '<div class="wrong-item-q">'+w.text+'</div>'+
+      '<div class="wrong-item-meta">錯咗 '+w.timesWrong+' 次</div></div>';
+    list.appendChild(div);
+  });
+}
+
+function renderDictChart(containerEl){
+  containerEl.innerHTML = '';
+  var sets = getAllDictationSets();
+  if(sets.length===0){ containerEl.innerHTML = '<p class="dash-sub">未有默書表。</p>'; return; }
+  sets.forEach(function(s){
+    var pct = dictationAccuracy(s.id);
+    var row = document.createElement('div');
+    row.className = 'topic-bar-row';
+    var fillClass = pct===null ? '' : (pct<50?'low':(pct<75?'mid':''));
+    row.innerHTML = '<span class="topic-bar-label">'+(s.icon||'✍️')+' '+s.title+'</span>'+
+      '<div class="topic-bar-track"><div class="topic-bar-fill '+fillClass+'" style="width:'+(pct===null?0:pct)+'%"></div></div>'+
+      '<span class="topic-bar-pct">'+(pct===null?'—':pct+'%')+'</span>';
+    containerEl.appendChild(row);
+  });
+}
+
+/* ======================================================================
    15. DASHBOARD RENDERING
    ====================================================================== */
 function renderDashboard(){
@@ -1216,6 +1486,12 @@ function formatDuration(sec){
 function moduleDisplayName(moduleId){
   if(MODULES[moduleId]) return MODULES[moduleId].icon+' '+MODULES[moduleId].title;
   if(moduleId === 'mixed-wrong') return '🏆 錯題重溫';
+  if(typeof moduleId === 'string' && moduleId.indexOf('dict:')===0){
+    var setId = moduleId.slice(5);
+    if(setId === 'dict-wrong-review') return '✍️ 默書錯字重溫';
+    var set = findDictationSet(setId);
+    return set ? '✍️ '+set.title : '✍️ 默書';
+  }
   return moduleId;
 }
 function renderDailyLog(containerEl){
@@ -1253,6 +1529,7 @@ function renderReportCenter(){
   $('#report-badges-count').textContent = state.profile.badges.length;
   renderDailyLog($('#report-daily-log'));
   renderTopicChart($('#report-topic-chart'));
+  renderDictChart($('#report-dict-chart'));
   renderWeakness($('#report-weakness'));
   var badgesEl = $('#report-badges');
   badgesEl.innerHTML = '';
@@ -1298,6 +1575,7 @@ function submitParentPin(){
     populateModuleSelect();
     renderParentStats();
     renderParentQuestionList();
+    renderParentDictSetList();
   } else {
     $('#parent-pin-error').classList.remove('hidden');
   }
@@ -1351,6 +1629,39 @@ function addCustomQuestion(data){
   saveState();
   renderParentQuestionList();
   showToast('已新增題目！');
+}
+
+function renderParentDictSetList(){
+  var wrap = $('#parent-dictset-list');
+  wrap.innerHTML = '';
+  if(state.dictationSets.length===0){
+    wrap.innerHTML = '<p class="dash-sub">暫時未有自訂默書表。</p>';
+    return;
+  }
+  state.dictationSets.forEach(function(s){
+    var div = document.createElement('div');
+    div.className = 'parent-question-item';
+    div.innerHTML = '<div><span class="wrong-item-tag">'+(s.type==='sentence'?'句子':'詞語')+'</span><div>'+s.title+'（'+s.items.length+' 項）</div></div>'+
+      '<div class="pq-actions"><button class="btn-secondary" data-del-dictset="'+s.id+'">🗑️ 刪除</button></div>';
+    wrap.appendChild(div);
+  });
+  $all('[data-del-dictset]', wrap).forEach(function(btn){
+    btn.onclick = function(){
+      var id = btn.dataset.delDictset;
+      state.dictationSets = state.dictationSets.filter(function(s){ return s.id!==id; });
+      saveState();
+      renderParentDictSetList();
+      showToast('已刪除默書表');
+    };
+  });
+}
+function addCustomDictSet(title, type, lines){
+  var setId = uid('dictset');
+  var items = lines.map(function(line, i){ return { id: setId+'-'+i, text: line }; });
+  state.dictationSets.push({ id:setId, title:title, icon: type==='sentence' ? '📜' : '🖋️', type:type, items:items });
+  saveState();
+  renderParentDictSetList();
+  return items.length;
 }
 
 /* ---- import pipeline ---- */
@@ -1525,10 +1836,11 @@ function attachEvents(){
       if(m === 'reading'){ renderReadingList(); showScreen('screen-reading-list'); }
       else if(m === 'verb'){ showScreen('screen-verb-game'); }
       else if(m === 'adjadv'){ showScreen('screen-adjadv-game'); }
+      else if(m === 'dictation'){ renderDictionSetList(); showScreen('screen-dictation-list'); }
       else { openNotes(m); }
     };
   });
-  $('#btn-wrong-center').onclick = function(){ renderWrongCenter(); showScreen('screen-wrongcenter'); };
+  $('#btn-wrong-center').onclick = function(){ renderWrongCenter(); renderDictWrongList(); showScreen('screen-wrongcenter'); };
   $('#btn-report-center').onclick = function(){ renderReportCenter(); showScreen('screen-report'); };
 
   /* ---- notes screen ---- */
@@ -1564,6 +1876,23 @@ function attachEvents(){
   $('#btn-clear-mastered').onclick = function(){
     state.wrongQuestions = state.wrongQuestions.filter(function(w){ return !w.mastered; });
     saveState(); renderWrongCenter(); showToast('已清除已掌握嘅題目');
+  };
+
+  /* ---- dictation ---- */
+  $('#btn-dict-play').onclick = function(){ playCurrentDictItem(); };
+  $('#btn-dict-next').onclick = function(){ nextDictItem(); };
+  $('#btn-dict-cancel').onclick = function(){ renderDictionSetList(); showScreen('screen-dictation-list'); };
+  $('#btn-dict-mark-all').onclick = function(){ markAllDictCorrect(); };
+  $('#btn-dict-submit').onclick = function(){ submitDictCheck(); };
+  $('#btn-dict-retry').onclick = function(){
+    var set = findDictationSet(dictSession.setId);
+    startDictation(dictSession.setId, set ? set.items : dictSession.items);
+  };
+  $('#btn-dict-home').onclick = function(){ renderDashboard(); showScreen('screen-dashboard'); };
+  $('#btn-dict-retry-wrong').onclick = function(){ retryDictationWrong(); };
+  $('#btn-dict-clear-mastered').onclick = function(){
+    state.dictationWrong = state.dictationWrong.filter(function(w){ return !w.mastered; });
+    saveState(); renderDictWrongList(); showToast('已清除已掌握嘅默書錯字');
   };
 
   /* ---- parent mode ---- */
@@ -1607,6 +1936,19 @@ function attachEvents(){
     e.target.reset();
     $('#q-mcq-options').classList.remove('hidden');
     $('#q-fill-answer').classList.add('hidden');
+  };
+
+  /* ---- dictation set management ---- */
+  $('#form-add-dictset').onsubmit = function(e){
+    e.preventDefault();
+    var title = $('#ds-title').value.trim();
+    var type = $('#ds-type').value;
+    var lines = $('#ds-items').value.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    if(!title){ showToast('請輸入默書表名稱！'); return; }
+    if(lines.length===0){ showToast('請輸入至少一項內容！'); return; }
+    var count = addCustomDictSet(title, type, lines);
+    showToast('已新增默書表「'+title+'」，共 '+count+' 項！');
+    e.target.reset();
   };
 
   /* ---- import ---- */

@@ -308,6 +308,26 @@ button, input, select, textarea{ font-family:var(--font-main); }
 @keyframes shake{ 0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-6px);} 80%{transform:translateX(6px);} }
 .quiz-card.flash-wrong{ animation:shake .4s ease; }
 
+/* ============ DICTATION ============ */
+.dictation-card{ text-align:center; }
+.dict-instruction{ margin-bottom:18px; font-size:15px; }
+.dict-play-btn{ font-size:26px; padding:26px; border-radius:50%; width:160px; height:160px; margin:0 auto; display:flex; align-items:center; justify-content:center; }
+.dict-play-count{ margin-top:10px; font-weight:bold; color:var(--wood-dark); min-height:20px; }
+.dictation-card .timer-toggle{ display:inline-block; margin:14px 0 4px; }
+.dict-nav-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+.dict-check-row{ align-items:center; }
+.dict-check-text{ font-size:19px; font-weight:bold; margin-top:4px; }
+.dict-check-actions{ display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.dict-mark-btn{
+  width:44px; height:44px; border-radius:8px; font-size:20px; cursor:pointer;
+  background:var(--parchment-dark); border:3px solid var(--wood-dark);
+  box-shadow:2px 2px 0 rgba(0,0,0,.3); transition:transform .08s;
+}
+.dict-mark-btn:active{ transform:translateY(2px); }
+.dict-mark-correct.active{ background:var(--ok-green); border-color:var(--ok-green-dark); }
+.dict-mark-wrong.active{ background:var(--bad-red); border-color:var(--bad-red-dark); }
+.dict-bonus-text{ grid-column:1 / -1; text-align:center; font-weight:bold; margin-top:8px; }
+
 /* ============ RESULT ============ */
 .result-wrap{ max-width:640px; margin:60px auto; padding:0 20px; position:relative; z-index:1; }
 .result-card{ text-align:center; }
