@@ -514,16 +514,17 @@
 
       <div id="parent-tab-dictation" class="parent-tab-content">
         <h3 class="section-title">新增默書表</h3>
-        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容，每行一個詞語（或一句），就會自動變成一份可以聽寫嘅默書表。</p>
+        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成段文章就揀「段落」，系統會自動按句號／問號／驚嘆號斷句。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。</p>
         <form id="form-add-dictset" class="add-question-form">
           <label>默書表名稱</label>
           <input type="text" id="ds-title" placeholder="例如：第10週學校默書表">
           <label>類型</label>
           <select id="ds-type">
-            <option value="word">詞語 Words</option>
-            <option value="sentence">句子 Sentences</option>
+            <option value="word">詞語 Words（每行一個）</option>
+            <option value="sentence">句子 Sentences（每行一句）</option>
+            <option value="passage">段落 Passage（自動斷句）</option>
           </select>
-          <label>內容（每行一個詞語／一句）</label>
+          <label>內容</label>
           <textarea id="ds-items" rows="8" placeholder="umbrella&#10;sunscreen&#10;architect"></textarea>
           <button type="submit" class="btn-primary">➕ 新增默書表</button>
         </form>
@@ -597,6 +598,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260823a"></script>
+<script src="app.js?v=20260823b"></script>
 </body>
 </html>

@@ -664,6 +664,31 @@ function speakEnglish(text, rate){
   }catch(e){}
 }
 
+/* punctuation marks are read aloud as words, matching how 默書 is dictated in class */
+var PUNCTUATION_SPEECH = [
+  [/\.\.\./g, ' dot dot dot '],
+  [/,/g, ' comma '],
+  [/;/g, ' semicolon '],
+  [/:/g, ' colon '],
+  [/\?/g, ' question mark '],
+  [/!/g, ' exclamation mark '],
+  [/\./g, ' full stop '],
+  [/"/g, ' quotation mark ']
+];
+function punctuationToSpeech(text){
+  var out = text || '';
+  PUNCTUATION_SPEECH.forEach(function(pair){ out = out.replace(pair[0], pair[1]); });
+  return out.replace(/\s+/g, ' ').trim();
+}
+
+function splitIntoSentences(text){
+  var blob = (text || '').replace(/\s*\n\s*/g, ' ').trim();
+  if(!blob) return [];
+  var matches = blob.match(/[^.!?]+[.!?]+(\s+|$)/g);
+  if(!matches) return [blob];
+  return matches.map(function(s){ return s.trim(); }).filter(Boolean);
+}
+
 /* ======================================================================
    7. PARTICLE EFFECTS (canvas)
    ====================================================================== */
@@ -1172,7 +1197,7 @@ function renderDictionSetList(){
     var btn = document.createElement('button');
     btn.className = 'module-card special';
     btn.innerHTML = '<span class="module-icon">'+(s.icon||'✍️')+'</span>'+
-      '<span class="module-title">'+s.title+'<br>'+(s.type==='sentence'?'句子':'詞語')+' x '+s.items.length+'</span>'+
+      '<span class="module-title">'+s.title+'<br>'+(DICT_TYPE_LABEL[s.type]||'詞語')+' x '+s.items.length+'</span>'+
       '<span class="module-progress"><span class="bar"><span class="bar-fill" style="width:'+(acc===null?0:acc)+'%"></span></span></span>';
     btn.onclick = function(){ startDictation(s.id, s.items); };
     wrap.appendChild(btn);
@@ -1207,7 +1232,7 @@ function renderDictItem(){
 function playCurrentDictItem(){
   var item = dictSession.items[dictSession.index];
   var slow = $('#chk-dict-slow').checked;
-  speakEnglish(item.text, slow ? 0.55 : 0.8);
+  speakEnglish(punctuationToSpeech(item.text), slow ? 0.55 : 0.8);
   dictSession.playCount++;
   $('#dict-play-count').textContent = '已播放 '+dictSession.playCount+' 次';
 }
@@ -1242,7 +1267,7 @@ function renderDictCheckList(){
     wrap.appendChild(div);
   });
   $all('[data-dict-replay]', wrap).forEach(function(btn){
-    btn.onclick = function(){ var item = dictSession.items[parseInt(btn.dataset.dictReplay,10)]; speakEnglish(item.text, 0.8); };
+    btn.onclick = function(){ var item = dictSession.items[parseInt(btn.dataset.dictReplay,10)]; speakEnglish(punctuationToSpeech(item.text), 0.8); };
   });
   $all('[data-dict-mark]', wrap).forEach(function(btn){
     btn.onclick = function(){
@@ -1641,7 +1666,7 @@ function renderParentDictSetList(){
   state.dictationSets.forEach(function(s){
     var div = document.createElement('div');
     div.className = 'parent-question-item';
-    div.innerHTML = '<div><span class="wrong-item-tag">'+(s.type==='sentence'?'句子':'詞語')+'</span><div>'+s.title+'（'+s.items.length+' 項）</div></div>'+
+    div.innerHTML = '<div><span class="wrong-item-tag">'+(DICT_TYPE_LABEL[s.type]||'詞語')+'</span><div>'+s.title+'（'+s.items.length+' 項）</div></div>'+
       '<div class="pq-actions"><button class="btn-secondary" data-del-dictset="'+s.id+'">🗑️ 刪除</button></div>';
     wrap.appendChild(div);
   });
@@ -1655,10 +1680,12 @@ function renderParentDictSetList(){
     };
   });
 }
+var DICT_TYPE_ICON = { word:'🖋️', sentence:'📜', passage:'📄' };
+var DICT_TYPE_LABEL = { word:'詞語', sentence:'句子', passage:'段落' };
 function addCustomDictSet(title, type, lines){
   var setId = uid('dictset');
   var items = lines.map(function(line, i){ return { id: setId+'-'+i, text: line }; });
-  state.dictationSets.push({ id:setId, title:title, icon: type==='sentence' ? '📜' : '🖋️', type:type, items:items });
+  state.dictationSets.push({ id:setId, title:title, icon: DICT_TYPE_ICON[type] || '✍️', type:type, items:items });
   saveState();
   renderParentDictSetList();
   return items.length;
@@ -1943,7 +1970,10 @@ function attachEvents(){
     e.preventDefault();
     var title = $('#ds-title').value.trim();
     var type = $('#ds-type').value;
-    var lines = $('#ds-items').value.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    var raw = $('#ds-items').value;
+    var lines = type === 'passage'
+      ? splitIntoSentences(raw)
+      : raw.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
     if(!title){ showToast('請輸入默書表名稱！'); return; }
     if(lines.length===0){ showToast('請輸入至少一項內容！'); return; }
     var count = addCustomDictSet(title, type, lines);
