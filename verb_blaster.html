@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verb Blaster — Mario Kart Tense Game</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px;font-family:Arial,sans-serif;}
@@ -398,6 +399,42 @@ const STUDY_BOSSES=[
   {name:'BOWSER SENSEI',hp:12,pool:['tear','throw','wake','weave','wear','teach','shine','spell']}
 ];
 
+// ── CLOUD LEADERBOARD (Supabase) — falls back to local-only if offline ────
+const SUPABASE_URL='https://jliphrfjoskjtdoufdjc.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_ciMUlRRVP0O1SRHAur0vBw_8jf190s3';
+const GAME_ID='verb_blaster';
+let sb=null;
+try{ if(window.supabase && window.supabase.createClient) sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){ sb=null; }
+
+async function fetchCloudLB(){
+  if(!sb) return null;
+  try{
+    const {data,error}=await sb.from('leaderboard')
+      .select('player_name,score,level_reached,mode,created_at')
+      .eq('game',GAME_ID).order('score',{ascending:false}).order('created_at',{ascending:false}).limit(30);
+    if(error) throw error;
+    return data;
+  }catch(e){ return null; }
+}
+async function pushCloudScore(entry){
+  if(!sb) return false;
+  try{
+    const {error}=await sb.from('leaderboard').insert({
+      game:GAME_ID, player_name:entry.name, score:entry.score, level_reached:entry.level, mode:entry.mode
+    });
+    if(error) throw error;
+    return true;
+  }catch(e){ return false; }
+}
+function subscribeCloudLB(onInsert){
+  if(!sb) return;
+  try{
+    sb.channel('leaderboard-'+GAME_ID)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'leaderboard',filter:'game=eq.'+GAME_ID},onInsert)
+      .subscribe();
+  }catch(e){}
+}
+
 // ── STORAGE HELPERS ───────────────────────────────────────────────────────
 function getLB(){return JSON.parse(localStorage.getItem('vb_lb')||'[]');}
 function saveLB(a){localStorage.setItem('vb_lb',JSON.stringify(a));}
@@ -782,12 +819,13 @@ function gameOver(){
   clearTimer();stopMusic();sfxOver();
   $('ainput').onkeydown=null;
 
-  // Save score
+  // Save score (local, always works offline) + sync to cloud leaderboard in the background
   let lb=getLB();
   let modeLabel=S.mode==='classic'?'Classic':S.mode==='study'?'重點溫習':'錯題回顧';
   let entry={name:currentPlayer,score:S.score,level:S.level,mode:modeLabel,date:new Date().toLocaleDateString('zh-HK')};
   lb.push(entry);lb.sort((a,b)=>b.score-a.score);lb=lb.slice(0,30);saveLB(lb);
   let rank=lb.findIndex(e=>e.name===entry.name&&e.score===entry.score&&e.date===entry.date)+1;
+  pushCloudScore(entry);
 
   let msg=S.score<5?'Keep training!':S.score<15?'Not bad!':S.score<30?'Good race!':S.score<50?'Expert racer!':'GRAND CHAMPION!';
   $('gotitle').textContent='GAME\nOVER';
@@ -811,9 +849,15 @@ function gameOver(){
 }
 
 // ── LEADERBOARD ────────────────────────────────────────────────────────────
-function renderLB(){
-  let lb=getLB();
+async function renderLB(){
   let tbody=$('lbbody');let empty=$('lbempty');
+  let cloud=await fetchCloudLB();
+  let lb;
+  if(cloud){
+    lb=cloud.map(r=>({name:r.player_name,score:r.score,level:r.level_reached,mode:r.mode||'',date:new Date(r.created_at).toLocaleDateString('zh-HK')}));
+  } else {
+    lb=getLB(); // offline fallback — this device's own history only
+  }
   if(!lb.length){tbody.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
   let medals=['🥇','🥈','🥉'];
@@ -823,7 +867,8 @@ function renderLB(){
     return`<tr class="${cls}"><td>${medal}</td><td>${e.name}</td><td>${e.score}</td><td style="font-size:9px;">${e.mode}</td><td>${e.level}</td><td style="font-size:9px;">${e.date}</td></tr>`;
   }).join('');
 }
-function clearLB(){if(confirm('Clear all scores?')){saveLB([]);renderLB();}}
+function clearLB(){if(confirm('Clear all LOCAL scores? (cloud scores must be removed from the Supabase dashboard)')){saveLB([]);renderLB();}}
+subscribeCloudLB(function(){ if(document.getElementById('lb').classList.contains('active')) renderLB(); });
 
 // ── CUSTOM VERBS ────────────────────────────────────────────────────────────
 function renderCV(){
