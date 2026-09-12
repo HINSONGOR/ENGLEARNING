@@ -1997,6 +1997,8 @@ function startEditDictSet(setId){
   editingDictSetId = setId;
   $('#ds-title').value = s.title;
   $('#ds-type').value = s.type;
+  $('#ds-type').disabled = true; // changing type mid-edit would silently discard the other type's content
+  $('#ds-type-edit-hint').classList.remove('hidden');
   $('#ds-type').dispatchEvent(new Event('change'));
   if(s.type === 'passage') renderParagraphInputBlocksFromData(s.paragraphs);
   else $('#ds-items').value = s.items.map(function(it){ return it.text; }).join('\n');
@@ -2007,6 +2009,8 @@ function startEditDictSet(setId){
 function cancelEditDictSet(){
   editingDictSetId = null;
   $('#form-add-dictset').reset();
+  $('#ds-type').disabled = false;
+  $('#ds-type-edit-hint').classList.add('hidden');
   renderParagraphInputBlocks(2);
   $('#ds-items-wrap').classList.remove('hidden');
   $('#ds-paragraphs-wrap').classList.add('hidden');
@@ -2323,7 +2327,11 @@ function attachEvents(){
   $('#form-add-dictset').onsubmit = function(e){
     e.preventDefault();
     var title = $('#ds-title').value.trim();
-    var type = $('#ds-type').value;
+    // belt-and-suspenders: while editing, always use the original set's type,
+    // never trust the dropdown — it should be disabled anyway, but a mismatch
+    // here previously overwrote a passage set's content with an empty word list
+    var editingSet = editingDictSetId ? findDictationSet(editingDictSetId) : null;
+    var type = editingSet ? editingSet.type : $('#ds-type').value;
     if(!title){ showToast('請輸入默書表名稱！'); return; }
     var content = (type === 'passage')
       ? $all('.ds-paragraph-block textarea').map(function(ta){ return ta.value; })

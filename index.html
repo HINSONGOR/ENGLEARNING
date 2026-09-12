@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260912d">
+<link rel="stylesheet" href="style.css?v=20260912e">
 </head>
 <body>
 
@@ -556,7 +556,7 @@
         <form id="form-add-dictset" class="add-question-form">
           <label>默書表名稱</label>
           <input type="text" id="ds-title" placeholder="例如：第10週學校默書表">
-          <label>類型</label>
+          <label>類型 <span id="ds-type-edit-hint" class="hidden" style="font-weight:normal;color:var(--bad-red-dark);">（編輯時唔可以改類型，如要轉類型請刪除舊表重新新增）</span></label>
           <select id="ds-type">
             <option value="word">詞語 Words（每行一個）</option>
             <option value="sentence">句子 Sentences（每行一句）</option>
@@ -646,6 +646,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260912d"></script>
+<script src="app.js?v=20260912e"></script>
 </body>
 </html>
