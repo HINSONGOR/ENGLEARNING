@@ -2259,6 +2259,7 @@ function attachEvents(){
 
   /* ---- dictation (typed mode) ---- */
   $('#btn-dictq-play').onclick = function(){ playCurrentDictQItem(); };
+  $('#btn-dictq-cancel').onclick = function(){ renderDictionSetList(); showScreen('screen-dictation-list'); };
   $('#btn-dictq-submit').onclick = function(){ submitDictAnswer(); };
   $('#btn-dictq-next').onclick = function(){ nextDictQItem(); };
   $('#dictq-answer-input').onkeydown = function(e){
