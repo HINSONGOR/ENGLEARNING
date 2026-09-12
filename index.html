@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260912e">
+<link rel="stylesheet" href="style.css?v=20260912f">
 </head>
 <body>
 
@@ -552,7 +552,7 @@
 
       <div id="parent-tab-dictation" class="parent-tab-content">
         <h3 class="section-title">新增默書表</h3>
-        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成篇文章就揀「段落」，逐段分開輸入落唔同格仔（唔使自己記得留空行），系統會自動幫每段斷句。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。「段落」型默書表可以喺練習畫面逐段揀，或者揀「隨機抽 X 段」，模擬學校淨係抽默書範圍入面其中幾段嘅測驗方式。</p>
+        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成篇文章就揀「段落」，逐段分開輸入落唔同格仔（唔使自己記得留空行），系統會自動幫每段斷句；如果一課書入面同時有生字表同課文，揀「混合」就可以兩樣一齊入落同一個默書表。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。有「段落」嘅默書表可以喺練習畫面逐段揀，或者揀「隨機抽 X 段」，模擬學校淨係抽默書範圍入面其中幾段嘅測驗方式。</p>
         <form id="form-add-dictset" class="add-question-form">
           <label>默書表名稱</label>
           <input type="text" id="ds-title" placeholder="例如：第10週學校默書表">
@@ -561,13 +561,18 @@
             <option value="word">詞語 Words（每行一個）</option>
             <option value="sentence">句子 Sentences（每行一句）</option>
             <option value="passage">段落 Passage（逐段輸入）</option>
+            <option value="mixed">混合：詞語 + 課文</option>
           </select>
           <div id="ds-items-wrap">
             <label>內容</label>
             <textarea id="ds-items" rows="8" placeholder="詞語／句子：一行一個"></textarea>
           </div>
+          <div id="ds-mixed-words-wrap" class="hidden">
+            <label>詞語／生字（每行一個）</label>
+            <textarea id="ds-mixed-words" rows="6" placeholder="scientists&#10;a laboratory&#10;a microscope"></textarea>
+          </div>
           <div id="ds-paragraphs-wrap" class="hidden">
-            <label>內容 — 逐段輸入（每段可以有幾句，會自動幫手斷句）</label>
+            <label>課文內容 — 逐段輸入（每段可以有幾句，會自動幫手斷句）</label>
             <div id="ds-paragraph-list"></div>
             <button type="button" id="btn-add-paragraph" class="btn-secondary">➕ 加多一段</button>
           </div>
@@ -646,6 +651,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260912e"></script>
+<script src="app.js?v=20260912f"></script>
 </body>
 </html>
