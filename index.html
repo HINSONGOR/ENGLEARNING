@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260912a">
+<link rel="stylesheet" href="style.css?v=20260912b">
 </head>
 <body>
 
@@ -551,7 +551,7 @@
 
       <div id="parent-tab-dictation" class="parent-tab-content">
         <h3 class="section-title">新增默書表</h3>
-        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成篇文章就揀「段落」，段與段之間留返一行空白（保留原文段落），系統會自動幫每段斷句。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。「段落」型默書表可以喺練習畫面揀「隨機抽 X 段」，模擬學校淨係抽默書範圍入面其中幾段嘅測驗方式。</p>
+        <p class="dash-sub">貼上呢個星期學校默書紙嘅內容 — 詞語／句子每行一個；成篇文章就揀「段落」，逐段分開輸入落唔同格仔（唔使自己記得留空行），系統會自動幫每段斷句。朗讀時會連標點符號一齊讀出（comma、full stop 等），同上堂默書一樣。「段落」型默書表可以喺練習畫面逐段揀，或者揀「隨機抽 X 段」，模擬學校淨係抽默書範圍入面其中幾段嘅測驗方式。</p>
         <form id="form-add-dictset" class="add-question-form">
           <label>默書表名稱</label>
           <input type="text" id="ds-title" placeholder="例如：第10週學校默書表">
@@ -559,10 +559,17 @@
           <select id="ds-type">
             <option value="word">詞語 Words（每行一個）</option>
             <option value="sentence">句子 Sentences（每行一句）</option>
-            <option value="passage">段落 Passage（自動斷句）</option>
+            <option value="passage">段落 Passage（逐段輸入）</option>
           </select>
-          <label>內容</label>
-          <textarea id="ds-items" rows="8" placeholder="詞語／句子：一行一個&#10;&#10;段落範例：&#10;Tommy was a young wizard. He loved magic.&#10;&#10;One day, he met a dragon. It was friendly."></textarea>
+          <div id="ds-items-wrap">
+            <label>內容</label>
+            <textarea id="ds-items" rows="8" placeholder="詞語／句子：一行一個"></textarea>
+          </div>
+          <div id="ds-paragraphs-wrap" class="hidden">
+            <label>內容 — 逐段輸入（每段可以有幾句，會自動幫手斷句）</label>
+            <div id="ds-paragraph-list"></div>
+            <button type="button" id="btn-add-paragraph" class="btn-secondary">➕ 加多一段</button>
+          </div>
           <button type="submit" class="btn-primary">➕ 新增默書表</button>
         </form>
         <h3 class="section-title">現有默書表（家長自訂）</h3>
@@ -635,6 +642,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260912a"></script>
+<script src="app.js?v=20260912b"></script>
 </body>
 </html>

@@ -438,6 +438,11 @@ button, input, select, textarea{ font-family:var(--font-main); }
 .add-question-form input, .add-question-form select, .add-question-form textarea{
   padding:10px; border:2px solid var(--parchment-line); border-radius:6px; font-size:15px;
 }
+.ds-paragraph-block{ border:2px solid var(--parchment-line); border-radius:8px; padding:10px; margin-bottom:10px; background:#fff8e8; }
+.ds-paragraph-block-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.ds-paragraph-block-header span{ font-weight:bold; }
+.ds-paragraph-remove{ background:transparent; border:none; color:var(--bad-red-dark); font-weight:bold; cursor:pointer; font-size:13px; padding:2px 6px; }
+.ds-paragraph-block textarea{ width:100%; padding:8px; border:2px solid var(--parchment-line); border-radius:6px; font-size:14px; resize:vertical; }
 .q-mcq-options{ display:grid; grid-template-columns:auto 1fr; gap:8px 10px; align-items:center; }
 .q-mcq-options label{ margin:0; white-space:nowrap; }
 .q-mcq-options select{ width:auto; justify-self:start; }

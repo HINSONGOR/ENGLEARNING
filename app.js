@@ -689,12 +689,6 @@ function splitIntoSentences(text){
   return matches.map(function(s){ return s.trim(); }).filter(Boolean);
 }
 
-/* blank line(s) = paragraph break; each paragraph is then split into sentences */
-function splitIntoParagraphs(text){
-  var blocks = (text || '').split(/\n\s*\n+/).map(function(b){ return b.trim(); }).filter(Boolean);
-  return blocks.map(splitIntoSentences).filter(function(sentences){ return sentences.length>0; });
-}
-
 /* ======================================================================
    7. PARTICLE EFFECTS (canvas)
    ====================================================================== */
@@ -1912,25 +1906,26 @@ function renderParentDictSetList(){
 }
 var DICT_TYPE_ICON = { word:'🖋️', sentence:'📜', passage:'📄' };
 var DICT_TYPE_LABEL = { word:'詞語', sentence:'句子', passage:'段落' };
-/* passage type: raw text with blank-line-separated paragraphs → { paragraphs, items }
-   word/sentence type: raw text with one line per item → { items } */
-function addCustomDictSet(title, type, raw){
+/* passage type: rawOrParagraphs is an array of raw paragraph strings, one per
+   input box the parent filled in — each gets auto-split into sentences.
+   word/sentence type: rawOrParagraphs is one raw blob, one item per line. */
+function addCustomDictSet(title, type, rawOrParagraphs){
   var setId = uid('dictset');
   var setObj = { id:setId, title:title, type:type, icon: DICT_TYPE_ICON[type] || '✍️' };
 
   if(type === 'passage'){
-    var paraSentences = splitIntoParagraphs(raw);
-    var paragraphs = paraSentences.map(function(sentences, pi){
+    var paragraphs = rawOrParagraphs.map(function(raw, pi){
+      var sentences = splitIntoSentences((raw||'').trim());
       return { id: setId+'-p'+pi, sentences: sentences.map(function(s, si){
         return { id: setId+'-p'+pi+'-s'+si, text: s, p: pi+1 };
       }) };
-    });
+    }).filter(function(p){ return p.sentences.length>0; });
     var items = paragraphs.reduce(function(acc,p){ return acc.concat(p.sentences); }, []);
     if(items.length===0) return null;
     setObj.paragraphs = paragraphs;
     setObj.items = items;
   } else {
-    var lines = (raw||'').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    var lines = (rawOrParagraphs||'').split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
     if(lines.length===0) return null;
     setObj.items = lines.map(function(line, i){ return { id: setId+'-'+i, text: line }; });
   }
@@ -1939,6 +1934,34 @@ function addCustomDictSet(title, type, raw){
   saveState();
   renderParentDictSetList();
   return { count: setObj.items.length, paragraphCount: setObj.paragraphs ? setObj.paragraphs.length : 0 };
+}
+
+/* ---- passage-type input: one numbered box per paragraph, so a parent never
+   has to remember "leave a blank line" — each box IS one paragraph ---- */
+function appendParagraphInputBlock(){
+  var list = $('#ds-paragraph-list');
+  var block = document.createElement('div');
+  block.className = 'ds-paragraph-block';
+  block.innerHTML = '<div class="ds-paragraph-block-header"><span></span>'+
+    '<button type="button" class="ds-paragraph-remove">✕ 刪除呢段</button></div>'+
+    '<textarea rows="3"></textarea>';
+  block.querySelector('.ds-paragraph-remove').onclick = function(){
+    if($all('.ds-paragraph-block', list).length <= 1){ showToast('最少要有一段！'); return; }
+    block.remove();
+    renumberParagraphBlocks();
+  };
+  list.appendChild(block);
+  renumberParagraphBlocks();
+}
+function renumberParagraphBlocks(){
+  $all('.ds-paragraph-block', $('#ds-paragraph-list')).forEach(function(block, i){
+    block.querySelector('.ds-paragraph-block-header span').textContent = '第 '+(i+1)+' 段';
+    block.querySelector('textarea').placeholder = '第 '+(i+1)+' 段內容（可以有幾句）';
+  });
+}
+function renderParagraphInputBlocks(count){
+  $('#ds-paragraph-list').innerHTML = '';
+  for(var i=0;i<count;i++) appendParagraphInputBlock();
 }
 
 /* ---- import pipeline ---- */
@@ -2238,18 +2261,30 @@ function attachEvents(){
   };
 
   /* ---- dictation set management ---- */
+  renderParagraphInputBlocks(2);
+  $('#ds-type').onchange = function(){
+    var isPassage = $('#ds-type').value === 'passage';
+    $('#ds-items-wrap').classList.toggle('hidden', isPassage);
+    $('#ds-paragraphs-wrap').classList.toggle('hidden', !isPassage);
+  };
+  $('#btn-add-paragraph').onclick = function(){ appendParagraphInputBlock(); };
   $('#form-add-dictset').onsubmit = function(e){
     e.preventDefault();
     var title = $('#ds-title').value.trim();
     var type = $('#ds-type').value;
-    var raw = $('#ds-items').value;
     if(!title){ showToast('請輸入默書表名稱！'); return; }
-    var result = addCustomDictSet(title, type, raw);
+    var content = (type === 'passage')
+      ? $all('.ds-paragraph-block textarea').map(function(ta){ return ta.value; })
+      : $('#ds-items').value;
+    var result = addCustomDictSet(title, type, content);
     if(!result){ showToast('請輸入至少一項內容！'); return; }
     var msg = '已新增默書表「'+title+'」，共 '+result.count+' 項';
     if(result.paragraphCount) msg += '（'+result.paragraphCount+' 段）';
     showToast(msg+'！');
     e.target.reset();
+    renderParagraphInputBlocks(2);
+    $('#ds-items-wrap').classList.remove('hidden');
+    $('#ds-paragraphs-wrap').classList.add('hidden');
   };
 
   /* ---- import ---- */
