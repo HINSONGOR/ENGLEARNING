@@ -343,13 +343,7 @@ button, input, select, textarea{ font-family:var(--font-main); }
   font-weight:bold; cursor:pointer; font-size:14px;
 }
 .dict-mode-toggle input{ width:20px; height:20px; flex-shrink:0; }
-.dict-para-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:6px; margin-top:4px; }
-.dict-para-btn{
-  padding:8px 6px; font-size:12px; font-weight:bold; border-radius:6px;
-  background:var(--parchment-dark); border:2px solid var(--wood-dark); cursor:pointer;
-  box-shadow:1px 1px 0 rgba(0,0,0,.3);
-}
-.dict-para-btn:active{ transform:translateY(1px); }
+.dict-para-block{ background:var(--parchment-dark); }
 .dict-answer-compare{ background:#fff8e8; border:2px solid var(--parchment-line); border-radius:8px; padding:10px 14px; margin-bottom:14px; line-height:1.7; }
 .dict-answer-compare p{ margin:4px 0; }
 .diff-match{ color:var(--ok-green-dark); }

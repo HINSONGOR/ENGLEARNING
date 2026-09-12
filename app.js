@@ -1201,7 +1201,9 @@ function dictationAccuracy(setId){
 function renderDictionSetList(){
   $('#chk-dict-typed-mode').checked = !!state.settings.dictTypedMode;
   var wrap = $('#dictation-set-list');
+  var paraWrap = $('#dictation-paragraph-sections');
   wrap.innerHTML = '';
+  paraWrap.innerHTML = '';
   var sets = getAllDictationSets();
   sets.forEach(function(s){
     var acc = dictationAccuracy(s.id);
@@ -1213,9 +1215,6 @@ function renderDictionSetList(){
       for(var n=1; n<=s.paragraphs.length; n++){
         options += '<option value="'+n+'"'+(n===defaultDraw?' selected':'')+'>'+n+'</option>';
       }
-      var paraButtons = s.paragraphs.map(function(p, pi){
-        return '<button class="dict-para-btn" data-draw-single="'+s.id+'" data-para-idx="'+pi+'">第'+paraOrdinal(pi)+'段（'+p.sentences.length+'項）</button>';
-      }).join('');
       card.innerHTML = '<span class="module-icon">'+(s.icon||'📄')+'</span>'+
         '<span class="module-title">'+s.title+'<br>共 '+s.paragraphs.length+' 段</span>'+
         '<span class="module-progress"><span class="bar"><span class="bar-fill" style="width:'+(acc===null?0:acc)+'%"></span></span></span>'+
@@ -1223,9 +1222,22 @@ function renderDictionSetList(){
         '<div class="dict-draw-row"><label>抽</label><select class="dict-draw-count" data-draw-select="'+s.id+'">'+options+'</select><label>段模擬測驗</label></div>'+
         '<button class="btn-primary" data-draw-random="'+s.id+'">🎲 開始隨機默書</button>'+
         '<button class="btn-secondary" data-draw-all="'+s.id+'">📖 全部'+s.paragraphs.length+'段練習</button>'+
-        '<div class="dict-para-grid">'+paraButtons+'</div>'+
         '</div>';
       wrap.appendChild(card);
+
+      // dedicated, clearly-labelled block grid — one big tile per paragraph, so a
+      // specific range (e.g. "test covers 第三至五段") is easy to pick at a glance
+      var section = document.createElement('div');
+      section.className = 'module-section dict-para-section';
+      var paraCards = s.paragraphs.map(function(p, pi){
+        return '<button class="module-card dict-para-block" data-draw-single="'+s.id+'" data-para-idx="'+pi+'">'+
+          '<span class="module-icon">📄</span>'+
+          '<span class="module-title">第'+paraOrdinal(pi)+'段<br>'+p.sentences.length+' 項</span>'+
+          '</button>';
+      }).join('');
+      section.innerHTML = '<h3 class="section-title">📑 '+s.title+' — 分段練習</h3>'+
+        '<div class="module-grid">'+paraCards+'</div>';
+      paraWrap.appendChild(section);
     } else {
       var btn = document.createElement('button');
       btn.className = 'module-card special';
@@ -1251,7 +1263,7 @@ function renderDictionSetList(){
       startDictation(set.id, set.items);
     };
   });
-  $all('[data-draw-single]', wrap).forEach(function(btn){
+  $all('[data-draw-single]', paraWrap).forEach(function(btn){
     btn.onclick = function(){
       var set = findDictationSet(btn.dataset.drawSingle);
       var para = set.paragraphs[parseInt(btn.dataset.paraIdx,10)];
