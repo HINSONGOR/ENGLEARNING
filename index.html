@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260912b">
+<link rel="stylesheet" href="style.css?v=20260912c">
 </head>
 <body>
 
@@ -570,7 +570,10 @@
             <div id="ds-paragraph-list"></div>
             <button type="button" id="btn-add-paragraph" class="btn-secondary">➕ 加多一段</button>
           </div>
-          <button type="submit" class="btn-primary">➕ 新增默書表</button>
+          <div class="form-row">
+            <button type="submit" id="btn-submit-dictset" class="btn-primary">➕ 新增默書表</button>
+            <button type="button" id="btn-cancel-edit-dictset" class="btn-secondary hidden">✖️ 取消編輯</button>
+          </div>
         </form>
         <h3 class="section-title">現有默書表（家長自訂）</h3>
         <div id="parent-dictset-list" class="parent-question-list"></div>
@@ -642,6 +645,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260912b"></script>
+<script src="app.js?v=20260912c"></script>
 </body>
 </html>

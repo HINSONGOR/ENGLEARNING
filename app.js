@@ -1891,14 +1891,19 @@ function renderParentDictSetList(){
       ? s.paragraphs.length+' 段／'+s.items.length+' 句'
       : s.items.length+' 項';
     div.innerHTML = '<div><span class="wrong-item-tag">'+(DICT_TYPE_LABEL[s.type]||'詞語')+'</span><div>'+s.title+'（'+countLabel+'）</div></div>'+
-      '<div class="pq-actions"><button class="btn-secondary" data-del-dictset="'+s.id+'">🗑️ 刪除</button></div>';
+      '<div class="pq-actions"><button class="btn-secondary" data-edit-dictset="'+s.id+'">✏️ 編輯</button>'+
+      '<button class="btn-secondary" data-del-dictset="'+s.id+'">🗑️ 刪除</button></div>';
     wrap.appendChild(div);
+  });
+  $all('[data-edit-dictset]', wrap).forEach(function(btn){
+    btn.onclick = function(){ startEditDictSet(btn.dataset.editDictset); };
   });
   $all('[data-del-dictset]', wrap).forEach(function(btn){
     btn.onclick = function(){
       var id = btn.dataset.delDictset;
       state.dictationSets = state.dictationSets.filter(function(s){ return s.id!==id; });
       saveState();
+      if(editingDictSetId === id) cancelEditDictSet();
       renderParentDictSetList();
       showToast('已刪除默書表');
     };
@@ -1909,8 +1914,7 @@ var DICT_TYPE_LABEL = { word:'詞語', sentence:'句子', passage:'段落' };
 /* passage type: rawOrParagraphs is an array of raw paragraph strings, one per
    input box the parent filled in — each gets auto-split into sentences.
    word/sentence type: rawOrParagraphs is one raw blob, one item per line. */
-function addCustomDictSet(title, type, rawOrParagraphs){
-  var setId = uid('dictset');
+function buildDictSetObj(setId, title, type, rawOrParagraphs){
   var setObj = { id:setId, title:title, type:type, icon: DICT_TYPE_ICON[type] || '✍️' };
 
   if(type === 'passage'){
@@ -1929,8 +1933,23 @@ function addCustomDictSet(title, type, rawOrParagraphs){
     if(lines.length===0) return null;
     setObj.items = lines.map(function(line, i){ return { id: setId+'-'+i, text: line }; });
   }
-
+  return setObj;
+}
+function addCustomDictSet(title, type, rawOrParagraphs){
+  var setObj = buildDictSetObj(uid('dictset'), title, type, rawOrParagraphs);
+  if(!setObj) return null;
   state.dictationSets.push(setObj);
+  saveState();
+  renderParentDictSetList();
+  return { count: setObj.items.length, paragraphCount: setObj.paragraphs ? setObj.paragraphs.length : 0 };
+}
+/* keeps the same set id so dictationProgress (accuracy history) survives the edit */
+function updateCustomDictSet(setId, title, type, rawOrParagraphs){
+  var setObj = buildDictSetObj(setId, title, type, rawOrParagraphs);
+  if(!setObj) return null;
+  var idx = state.dictationSets.findIndex(function(s){ return s.id===setId; });
+  if(idx === -1) return null;
+  state.dictationSets[idx] = setObj;
   saveState();
   renderParentDictSetList();
   return { count: setObj.items.length, paragraphCount: setObj.paragraphs ? setObj.paragraphs.length : 0 };
@@ -1962,6 +1981,37 @@ function renumberParagraphBlocks(){
 function renderParagraphInputBlocks(count){
   $('#ds-paragraph-list').innerHTML = '';
   for(var i=0;i<count;i++) appendParagraphInputBlock();
+}
+function renderParagraphInputBlocksFromData(paragraphs){
+  $('#ds-paragraph-list').innerHTML = '';
+  paragraphs.forEach(function(){ appendParagraphInputBlock(); });
+  var textareas = $all('.ds-paragraph-block textarea');
+  paragraphs.forEach(function(p, i){ textareas[i].value = p.sentences.map(function(s){ return s.text; }).join(' '); });
+}
+
+/* ---- editing an existing dictation set (keeps its id, so accuracy history survives) ---- */
+var editingDictSetId = null;
+function startEditDictSet(setId){
+  var s = findDictationSet(setId);
+  if(!s) return;
+  editingDictSetId = setId;
+  $('#ds-title').value = s.title;
+  $('#ds-type').value = s.type;
+  $('#ds-type').dispatchEvent(new Event('change'));
+  if(s.type === 'passage') renderParagraphInputBlocksFromData(s.paragraphs);
+  else $('#ds-items').value = s.items.map(function(it){ return it.text; }).join('\n');
+  $('#btn-submit-dictset').textContent = '💾 更新默書表';
+  $('#btn-cancel-edit-dictset').classList.remove('hidden');
+  $('#form-add-dictset').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function cancelEditDictSet(){
+  editingDictSetId = null;
+  $('#form-add-dictset').reset();
+  renderParagraphInputBlocks(2);
+  $('#ds-items-wrap').classList.remove('hidden');
+  $('#ds-paragraphs-wrap').classList.add('hidden');
+  $('#btn-submit-dictset').textContent = '➕ 新增默書表';
+  $('#btn-cancel-edit-dictset').classList.add('hidden');
 }
 
 /* ---- import pipeline ---- */
@@ -2268,6 +2318,7 @@ function attachEvents(){
     $('#ds-paragraphs-wrap').classList.toggle('hidden', !isPassage);
   };
   $('#btn-add-paragraph').onclick = function(){ appendParagraphInputBlock(); };
+  $('#btn-cancel-edit-dictset').onclick = function(){ cancelEditDictSet(); };
   $('#form-add-dictset').onsubmit = function(e){
     e.preventDefault();
     var title = $('#ds-title').value.trim();
@@ -2276,15 +2327,15 @@ function attachEvents(){
     var content = (type === 'passage')
       ? $all('.ds-paragraph-block textarea').map(function(ta){ return ta.value; })
       : $('#ds-items').value;
-    var result = addCustomDictSet(title, type, content);
+    var wasEditing = !!editingDictSetId;
+    var result = wasEditing
+      ? updateCustomDictSet(editingDictSetId, title, type, content)
+      : addCustomDictSet(title, type, content);
     if(!result){ showToast('請輸入至少一項內容！'); return; }
-    var msg = '已新增默書表「'+title+'」，共 '+result.count+' 項';
+    var msg = (wasEditing ? '已更新默書表「' : '已新增默書表「')+title+'」，共 '+result.count+' 項';
     if(result.paragraphCount) msg += '（'+result.paragraphCount+' 段）';
     showToast(msg+'！');
-    e.target.reset();
-    renderParagraphInputBlocks(2);
-    $('#ds-items-wrap').classList.remove('hidden');
-    $('#ds-paragraphs-wrap').classList.add('hidden');
+    cancelEditDictSet();
   };
 
   /* ---- import ---- */
