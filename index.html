@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>HINSON ENG ADVENTURE 魔法英語大冒險</title>
-<link rel="stylesheet" href="style.css?v=20260912f">
+<link rel="stylesheet" href="style.css?v=20260912g">
 </head>
 <body>
 
@@ -573,6 +573,11 @@
           </div>
           <div id="ds-paragraphs-wrap" class="hidden">
             <label>課文內容 — 逐段輸入（每段可以有幾句，會自動幫手斷句）</label>
+            <button type="button" id="btn-toggle-autosplit" class="btn-secondary">📋 貼上成段課文，自動分段</button>
+            <div id="ds-autosplit-wrap" class="hidden">
+              <textarea id="ds-autosplit-input" rows="8" placeholder="貼上成段課文，段與段之間留一行空白 —— 撳「自動分段」之後會落返去下面每段一個格，記得檢查啱唔啱先撳「新增／更新默書表」"></textarea>
+              <button type="button" id="btn-run-autosplit" class="btn-primary">🪄 自動分段</button>
+            </div>
             <div id="ds-paragraph-list"></div>
             <button type="button" id="btn-add-paragraph" class="btn-secondary">➕ 加多一段</button>
           </div>
@@ -651,6 +656,6 @@
   </div>
 </div>
 
-<script src="app.js?v=20260912f"></script>
+<script src="app.js?v=20260912g"></script>
 </body>
 </html>

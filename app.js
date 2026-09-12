@@ -2368,6 +2368,19 @@ function attachEvents(){
     $('#ds-paragraphs-wrap').classList.toggle('hidden', !(isPassage || isMixed));
   };
   $('#btn-add-paragraph').onclick = function(){ appendParagraphInputBlock(); };
+  $('#btn-toggle-autosplit').onclick = function(){ $('#ds-autosplit-wrap').classList.toggle('hidden'); };
+  $('#btn-run-autosplit').onclick = function(){
+    var raw = $('#ds-autosplit-input').value;
+    var blocks = raw.split(/\n\s*\n+/).map(function(b){ return b.trim(); }).filter(Boolean);
+    if(blocks.length===0){ showToast('請先貼上課文內容！'); return; }
+    $('#ds-paragraph-list').innerHTML = '';
+    blocks.forEach(function(){ appendParagraphInputBlock(); });
+    var textareas = $all('.ds-paragraph-block textarea');
+    blocks.forEach(function(b, i){ textareas[i].value = b; });
+    $('#ds-autosplit-input').value = '';
+    $('#ds-autosplit-wrap').classList.add('hidden');
+    showToast('已自動分做 '+blocks.length+' 段，落去下面檢查吓啱唔啱先撳新增／更新！');
+  };
   $('#btn-cancel-edit-dictset').onclick = function(){ cancelEditDictSet(); };
   $('#form-add-dictset').onsubmit = function(e){
     e.preventDefault();
