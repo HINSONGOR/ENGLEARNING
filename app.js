@@ -468,30 +468,7 @@ var READING_PASSAGES = [
 /* ======================================================================
    3b. DICTATION SETS (默書) — audio-only, self-checked on paper
    ====================================================================== */
-var DICTATION_SETS = [
-  { id:'dictset1', title:'核心生字默書 Unit 1-5', icon:'🖋️', type:'word',
-    items:[
-      { id:'dictset1-w1', text:'umbrella' }, { id:'dictset1-w2', text:'sunscreen' },
-      { id:'dictset1-w3', text:'shelf' }, { id:'dictset1-w4', text:'director' },
-      { id:'dictset1-w5', text:'stuntman' }, { id:'dictset1-w6', text:'costume' },
-      { id:'dictset1-w7', text:'exhaust' }, { id:'dictset1-w8', text:'recycled' },
-      { id:'dictset1-w9', text:'leather' }, { id:'dictset1-w10', text:'architect' },
-      { id:'dictset1-w11', text:'client' }, { id:'dictset1-w12', text:'artist' },
-      { id:'dictset1-w13', text:'encourage' }, { id:'dictset1-w14', text:'decide' },
-      { id:'dictset1-w15', text:'remind' }
-    ] },
-  { id:'dictset2', title:'佳句默書 Unit 1-5', icon:'📜', type:'sentence',
-    items:[
-      { id:'dictset2-s1', text:'If you mix red and yellow, you get orange.' },
-      { id:'dictset2-s2', text:'The bag is too heavy to carry.' },
-      { id:'dictset2-s3', text:'Although Helen is ill, she still goes to school.' },
-      { id:'dictset2-s4', text:'Diana has worked here since 2009.' },
-      { id:'dictset2-s5', text:'The director told the stuntman to jump higher.' },
-      { id:'dictset2-s6', text:'Old bottles are recycled every day.' },
-      { id:'dictset2-s7', text:'The shirt is made by Victory Fashion.' },
-      { id:'dictset2-s8', text:'If it rains, I will stay at home.' }
-    ] }
-];
+var DICTATION_SETS = [];
 function getAllDictationSets(){ return DICTATION_SETS.concat(state.dictationSets); }
 function findDictationSet(setId){ return getAllDictationSets().find(function(s){ return s.id===setId; }); }
 
