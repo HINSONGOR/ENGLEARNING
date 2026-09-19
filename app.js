@@ -1442,8 +1442,14 @@ function retryDictationWrong(){
   startDictation('dict-wrong-review', items);
 }
 
-/* ---- typed mode: type the answer, auto-marked immediately (punctuation counts, case doesn't) ---- */
-function normalizeDictationAnswer(s){ return (s||'').toString().trim().toLowerCase().replace(/\s+/g,' '); }
+/* ---- typed mode: type the answer, auto-marked immediately (punctuation counts, case doesn't,
+   but a missing/extra space right next to punctuation — e.g. "1923,he" vs "1923, he" — doesn't) ---- */
+function normalizeDictationAnswer(s){
+  return (s||'').toString().trim().toLowerCase()
+    .replace(/\s+/g,' ')
+    .replace(/\s*([,.!?;:])\s*/g, '$1 ')
+    .trim();
+}
 function checkDictationAnswer(item, userInput){ return normalizeDictationAnswer(userInput) === normalizeDictationAnswer(item.text); }
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function renderDictDiffHTML(correctText, userInput){
